@@ -1,4 +1,4 @@
-# Connect 4 game - rest service 
+# Connect 4 game: rest service 
 
 This module provides HTTP service which exposes REST API for the game.
 

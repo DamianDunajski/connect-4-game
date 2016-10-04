@@ -12,6 +12,7 @@
     </properties>
 
     <dependencies>
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -35,6 +36,7 @@
     </build>
 
     <modules>
+        <module>domain</module>
         <module>rest-service</module>
     </modules>
 

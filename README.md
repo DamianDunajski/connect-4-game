@@ -1,4 +1,4 @@
-# Connect 4 - game
+# Connect 4 game
 
 This project is a example implementation of *Connect 4* game, made for the interview purpose.
 
@@ -8,6 +8,7 @@ Current implementation is far from being final product ready for deployment, ins
 
 Project is built from following components:
 
+- [domain](domain/README.md) - domain classes representing game, board and players
 - [rest-service](rest-service/README.md) - HTTP service exposing REST API
 
 ## Contributing
