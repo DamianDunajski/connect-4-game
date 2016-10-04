@@ -7,11 +7,11 @@ import io.swagger.annotations.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Path("/game/connect-4")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,12 +26,12 @@ public class GameResource {
 
     @Timed
     @POST
-    @ApiOperation(value = "Create game", code = 204)
+    @ApiOperation(value = "Create new game")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Game has been created"),
+            @ApiResponse(code = 200, message = "Game has been created"),
             @ApiResponse(code = 500, message = "Error occurred - game has not been created")
     })
-    public Game createGame(@ApiParam(name = "player", value = "First player in the game", required = true) @NotNull @Valid Player player) {
+    public Game createGame(@ApiParam(name = "player", value = "Player who starts new game", required = true) @NotNull @Valid Player player) {
         Game game = new Game();
         game.addPlayer(player);
 
@@ -39,4 +39,26 @@ public class GameResource {
 
         return game;
     }
+
+    @Timed
+    @PUT
+    @Path("{id}/join")
+    @ApiOperation(value = "Join existing game")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Game has been joined"),
+            @ApiResponse(code = 404, message = "Game does not exist or has been already completed"),
+            @ApiResponse(code = 500, message = "Error occurred - game has not been joined")
+    })
+    public Game joinGame(@ApiParam(name = "id", value = "ID of the game to join", required = true) @PathParam("id") UUID id,
+                         @ApiParam(name = "player", value = "Player who joins existing game", required = true) @NotNull @Valid Player player) {
+
+        Game game = findGameByID(id).orElseThrow(() -> new WebApplicationException(404));
+        game.addPlayer(player);
+        return game;
+    }
+
+    private Optional<Game> findGameByID(UUID id) {
+        return this.gamesInProgress.stream().filter(game -> game.getId().equals(id)).findFirst();
+    }
+
 }

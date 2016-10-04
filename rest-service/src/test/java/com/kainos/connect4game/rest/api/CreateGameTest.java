@@ -7,15 +7,16 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 
+import static com.kainos.connect4game.rest.utils.DomainUtils.player;
 import static javax.ws.rs.client.Entity.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateGameTest extends BaseGameResourceTest {
 
-    private final Player player = new Player("John", Player.Colour.Red);
+    private final Player player = player("John", Player.Colour.Red);
 
     @Test
-    public void shouldCreateGamesWithUniqueIDs() {
+    public void shouldReturnGamesWithUniqueIDs() {
         Game firstGame = makeCreateGameRequest(player);
         Game secondGame = makeCreateGameRequest(player);
 
@@ -25,7 +26,7 @@ public class CreateGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    public void shouldCreateGameWithProperlySizedBlankBoard() {
+    public void shouldReturnGameWithProperlySizedBlankBoard() {
         Game game = makeCreateGameRequest(player);
 
         assertThat(game.getBoard().getFields())
@@ -35,7 +36,7 @@ public class CreateGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    public void shouldCreateGameWithFirstPlayerOnThePlayersList() {
+    public void shouldReturnGameWithFirstPlayerOnThePlayersList() {
         Game game = makeCreateGameRequest(player);
 
         assertThat(game.getPlayers()).containsOnly(player);

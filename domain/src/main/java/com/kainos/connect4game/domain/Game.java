@@ -1,10 +1,10 @@
 package com.kainos.connect4game.domain;
 
-import com.google.common.base.Preconditions;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.UUID.randomUUID;
 
 public class Game {
@@ -35,7 +35,8 @@ public class Game {
     }
 
     public void addPlayer(Player player) {
-        Preconditions.checkState(players.size() < 2, "Game cannot have more then 2 players");
+        checkState(players.size() < 2, "Game cannot have more then 2 players");
+        checkState(players.stream().noneMatch(p -> p.getColour().equals(player.getColour())), "Two players cannot choose the same colour");
         players.add(player);
     }
 
