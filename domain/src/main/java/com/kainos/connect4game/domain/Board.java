@@ -16,7 +16,7 @@ public class Board {
     public static final int NUMBER_OF_ROWS = 6;
 
     @ApiModelProperty(value = "List of the fields on the board", required = true)
-    private List<Field> fields;
+    private final List<Field> fields;
 
     Board() {
         this.fields = new ArrayList<>(NUMBER_OF_COLUMNS * NUMBER_OF_ROWS);
@@ -33,24 +33,26 @@ public class Board {
     }
 
     void dropDisc(Player.Colour colour, int column) {
-        checkNotNull(colour, "Colour of the disc cannot be null");
-        checkArgument(column >= 0 && column < NUMBER_OF_COLUMNS, "Column " + column + " does not exist on the board");
+        synchronized (fields) {
+            checkNotNull(colour, "Colour of the disc cannot be null");
+            checkArgument(column >= 0 && column < NUMBER_OF_COLUMNS, "Column " + column + " does not exist on the board");
 
-        OptionalInt lastOccupiedRow = fields.stream()
-                .filter(field -> field.column == column && field.colour != null)
-                .mapToInt(Field::getRow)
-                .min();
+            OptionalInt lastOccupiedRow = fields.stream()
+                    .filter(field -> field.column == column && field.colour != null)
+                    .mapToInt(Field::getRow)
+                    .min();
 
-        if (lastOccupiedRow.isPresent()) {
-            checkState(lastOccupiedRow.getAsInt() != 0, "Column " + column + " is already full");
+            if (lastOccupiedRow.isPresent()) {
+                checkState(lastOccupiedRow.getAsInt() != 0, "Column " + column + " is already full");
 
-            fields.stream()
-                    .filter(findNextAvailableField(column, lastOccupiedRow.getAsInt()))
-                    .forEach(field -> field.colour = colour);
-        } else {
-            fields.stream()
-                    .filter(findNextAvailableField(column, Board.NUMBER_OF_ROWS))
-                    .forEach(field -> field.colour = colour);
+                fields.stream()
+                        .filter(findNextAvailableField(column, lastOccupiedRow.getAsInt()))
+                        .forEach(field -> field.colour = colour);
+            } else {
+                fields.stream()
+                        .filter(findNextAvailableField(column, Board.NUMBER_OF_ROWS))
+                        .forEach(field -> field.colour = colour);
+            }
         }
     }
 

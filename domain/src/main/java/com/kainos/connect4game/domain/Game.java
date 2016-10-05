@@ -35,9 +35,12 @@ public class Game {
     }
 
     public void addPlayer(Player player) {
-        checkState(players.size() < 2, "Game cannot have more then 2 players");
-        checkState(players.stream().noneMatch(p -> p.getColour().equals(player.getColour())), "Two players cannot choose the same colour");
-        players.add(player);
+        synchronized (players) {
+            checkState(players.size() < 2, "Game cannot have more then 2 players");
+            checkState(players.stream().noneMatch(p -> p.getColour().equals(player.getColour())), "Two players cannot choose the same colour");
+
+            players.add(player);
+        }
     }
 
     public void dropDisc(Player.Colour colour, int column) {
