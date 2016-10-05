@@ -19,8 +19,7 @@ public class Player {
     private final Colour colour;
 
     @JsonCreator
-    public Player(@JsonProperty("name") String name,
-                  @JsonProperty("colour") Colour colour) {
+    public Player(@JsonProperty("name") String name, @JsonProperty("colour") Colour colour) {
         checkNotNull(name, "Player name cannot be null");
         checkNotNull(colour, "Player colour cannot be null");
 

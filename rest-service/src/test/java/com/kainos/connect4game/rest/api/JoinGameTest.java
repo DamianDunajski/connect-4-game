@@ -7,13 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import java.util.UUID;
 
 import static com.kainos.connect4game.rest.utils.DomainUtils.game;
 import static com.kainos.connect4game.rest.utils.DomainUtils.player;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -62,6 +61,6 @@ public class JoinGameTest extends BaseGameResourceTest {
 
     private Game makeJoinGameRequest(UUID id, Player player) {
         return resources.client().target(BASE_URL + "/" + id + "/join").request()
-                .put(entity(player, MediaType.APPLICATION_JSON_TYPE), Game.class);
+                .put(json(player), Game.class);
     }
 }

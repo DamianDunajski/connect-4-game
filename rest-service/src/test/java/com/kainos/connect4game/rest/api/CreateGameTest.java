@@ -5,10 +5,8 @@ import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
-
 import static com.kainos.connect4game.rest.utils.DomainUtils.player;
-import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateGameTest extends BaseGameResourceTest {
@@ -51,6 +49,6 @@ public class CreateGameTest extends BaseGameResourceTest {
 
     private Game makeCreateGameRequest(Player player) {
         return resources.client().target(BASE_URL).request()
-                .post(entity(player, MediaType.APPLICATION_JSON_TYPE), Game.class);
+                .post(json(player), Game.class);
     }
 }

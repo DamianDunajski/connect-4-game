@@ -40,6 +40,10 @@ public class Game {
         players.add(player);
     }
 
+    public void dropDisc(Player.Colour colour, int column) {
+        board.dropDisc(colour, column);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
