@@ -1,5 +1,6 @@
 package com.kainos.connect4game.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.*;
@@ -15,11 +16,21 @@ public class Game {
     private final Board board;
     @ApiModelProperty(value = "List of players in the game", required = true)
     private final List<Player> players;
+    //
+    private Board.Field lastPopulatedField;
 
-    public Game() {
-        this.id = randomUUID();
-        this.board = new Board();
-        this.players = new ArrayList<>();
+    public Game(Player... players) {
+        this(randomUUID(), new Board(), new ArrayList<Player>());
+
+        for (Player player : players) {
+            addPlayer(player);
+        }
+    }
+
+    public Game(@JsonProperty("id") UUID id, @JsonProperty("board") Board board, @JsonProperty("players") List<Player> players) {
+        this.id = id;
+        this.board = board;
+        this.players = players;
     }
 
     public UUID getId() {
@@ -44,7 +55,11 @@ public class Game {
     }
 
     public void dropDisc(Player.Colour colour, int column) {
-        board.dropDisc(colour, column);
+        synchronized (this) {
+            checkState(lastPopulatedField == null || lastPopulatedField.getColour() != colour, "Single player cannot drop two discs in a row");
+
+            lastPopulatedField = board.dropDisc(colour, column);
+        }
     }
 
     @Override

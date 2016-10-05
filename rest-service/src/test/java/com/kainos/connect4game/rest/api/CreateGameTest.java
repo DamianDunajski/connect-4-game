@@ -5,13 +5,12 @@ import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
 import org.junit.Test;
 
-import static com.kainos.connect4game.rest.utils.DomainUtils.player;
 import static javax.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateGameTest extends BaseGameResourceTest {
 
-    private final Player player = player("John", Player.Colour.Red);
+    private final Player player = new Player("John", Player.Colour.Red);
 
     @Test
     public void shouldReturnGamesWithUniqueIDs() {

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -32,32 +31,33 @@ public class Board {
         return Collections.unmodifiableList(fields);
     }
 
-    void dropDisc(Player.Colour colour, int column) {
+    Field dropDisc(Player.Colour colour, int column) {
         synchronized (fields) {
             checkNotNull(colour, "Colour of the disc cannot be null");
             checkArgument(column >= 0 && column < NUMBER_OF_COLUMNS, "Column " + column + " does not exist on the board");
 
-            OptionalInt lastOccupiedRow = fields.stream()
-                    .filter(field -> field.column == column && field.colour != null)
-                    .mapToInt(Field::getRow)
-                    .min();
+            OptionalInt lastOccupiedRow = findLastOccupiedRow(column);
 
-            if (lastOccupiedRow.isPresent()) {
-                checkState(lastOccupiedRow.getAsInt() != 0, "Column " + column + " is already full");
+            lastOccupiedRow.ifPresent((row) -> checkState(row != 0, "Column " + column + " is already full"));
 
-                fields.stream()
-                        .filter(findNextAvailableField(column, lastOccupiedRow.getAsInt()))
-                        .forEach(field -> field.colour = colour);
-            } else {
-                fields.stream()
-                        .filter(findNextAvailableField(column, Board.NUMBER_OF_ROWS))
-                        .forEach(field -> field.colour = colour);
-            }
+            Field nextAvailableField = findNextAvailableField(column, lastOccupiedRow);
+            nextAvailableField.colour = colour;
+            return nextAvailableField;
         }
     }
 
-    private Predicate<Field> findNextAvailableField(int column, int lastOccupiedRow) {
-        return field -> field.column == column && field.row == lastOccupiedRow - 1;
+    private OptionalInt findLastOccupiedRow(int column) {
+        return fields.stream()
+                .filter(field -> field.column == column && field.colour != null)
+                .mapToInt(Field::getRow)
+                .min();
+    }
+
+    private Field findNextAvailableField(int column, OptionalInt lastOccupiedRow) {
+        return fields.stream()
+                .filter(field -> field.column == column && field.row == lastOccupiedRow.orElse(Board.NUMBER_OF_ROWS) - 1)
+                .findFirst()
+                .get();
     }
 
     @Override

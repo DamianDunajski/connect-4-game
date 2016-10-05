@@ -9,8 +9,6 @@ import org.junit.Test;
 import javax.ws.rs.WebApplicationException;
 import java.util.UUID;
 
-import static com.kainos.connect4game.rest.utils.DomainUtils.game;
-import static com.kainos.connect4game.rest.utils.DomainUtils.player;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class JoinGameTest extends BaseGameResourceTest {
 
-    private final Player firstPlayer = player("John", Colour.Red);
-    private final Player secondPlayer = player("Carl", Colour.Yellow);
+    private final Player firstPlayer = new Player("John", Colour.Red);
+    private final Player secondPlayer = new Player("Carl", Colour.Yellow);
 
-    private final Game existingGame = game(firstPlayer);
+    private final Game existingGame = new Game(firstPlayer);
 
     @Before
     public void initGames() {
@@ -45,7 +43,7 @@ public class JoinGameTest extends BaseGameResourceTest {
 
     @Test
     public void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), player("Carl", Colour.Red)))
+        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Carl", Colour.Red)))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }
@@ -54,7 +52,7 @@ public class JoinGameTest extends BaseGameResourceTest {
     public void shouldReturn500ResponseWhenThirdPlayerJoins() {
         existingGame.addPlayer(secondPlayer);
 
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), player("Stephanie", Colour.Yellow)))
+        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Stephanie", Colour.Yellow)))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }

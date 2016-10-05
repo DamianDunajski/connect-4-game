@@ -9,8 +9,6 @@ import org.junit.Test;
 import javax.ws.rs.WebApplicationException;
 import java.util.UUID;
 
-import static com.kainos.connect4game.rest.utils.DomainUtils.game;
-import static com.kainos.connect4game.rest.utils.DomainUtils.player;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DropDiscTest extends BaseGameResourceTest {
 
-    private final Player firstPlayer = player("John", Player.Colour.Red);
-    private final Player secondPlayer = player("Carl", Player.Colour.Yellow);
+    private final Player firstPlayer = new Player("John", Player.Colour.Red);
+    private final Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
 
-    private final Game existingGame = game(firstPlayer, secondPlayer);
+    private final Game existingGame = new Game(firstPlayer, secondPlayer);
 
     @Before
     public void initGames() {
@@ -63,7 +61,7 @@ public class DropDiscTest extends BaseGameResourceTest {
     @Test
     public void shouldReturn500ResponseWhenDiscIsBeingDroppedIntoFullColumn() {
         for (int i = 0; i < Board.NUMBER_OF_ROWS; i++) {
-            existingGame.dropDisc(Player.Colour.Red, 0);
+            existingGame.dropDisc(Player.Colour.values()[i % 2], 0);
         }
 
         assertThatThrownBy(() -> makeDropDiscRequest(existingGame.getId(), secondPlayer.getColour(), 0))

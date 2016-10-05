@@ -26,7 +26,7 @@ public class BoardMultiThreadingTest {
                 final int column = i;
                 executorService.submit(() -> {
                     try {
-                        game.dropDisc(Player.Colour.Red, column);
+                        game.getBoard().dropDisc(Player.Colour.Red, column);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     } finally {

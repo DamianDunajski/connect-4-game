@@ -28,4 +28,15 @@ public class GameTest {
                 .hasMessage("Game cannot have more then 2 players");
     }
 
+    @Test
+    public void shouldThrowAnExceptionWhenTheSamePlayerIsMakingTwoConsecutiveDrops() throws Exception {
+        Player player = new Player("John", Player.Colour.Red);
+        Game game = new Game(player);
+        game.dropDisc(player.getColour(), 0);
+
+        assertThatThrownBy(() -> game.dropDisc(player.getColour(), 0))
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasMessage("Single player cannot drop two discs in a row");
+    }
+
 }
