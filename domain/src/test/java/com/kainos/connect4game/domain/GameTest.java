@@ -2,6 +2,7 @@ package com.kainos.connect4game.domain;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
@@ -37,6 +38,41 @@ public class GameTest {
         assertThatThrownBy(() -> game.dropDisc(player.getColour(), 0))
                 .isExactlyInstanceOf(IllegalStateException.class)
                 .hasMessage("Single player cannot drop two discs in a row");
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenOutcomeHasBeenDeterminedButPlayersContinueDroppingDiscs() throws Exception {
+        Player firstPlayer = new Player("John", Player.Colour.Red);
+        Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
+        Game game = new Game(firstPlayer, secondPlayer);
+        game.dropDisc(firstPlayer.getColour(), 0);
+        game.dropDisc(secondPlayer.getColour(), 0);
+        game.dropDisc(firstPlayer.getColour(), 1);
+        game.dropDisc(secondPlayer.getColour(), 1);
+        game.dropDisc(firstPlayer.getColour(), 2);
+        game.dropDisc(secondPlayer.getColour(), 2);
+        game.dropDisc(firstPlayer.getColour(), 3);
+
+        assertThatThrownBy(() -> game.dropDisc(secondPlayer.getColour(), 3))
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasMessage("Game has already ended");
+    }
+
+    @Test
+    public void shouldHaveOutcomeWhenFourDiscsHasBeenConnected() {
+        Player firstPlayer = new Player("John", Player.Colour.Red);
+        Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
+        Game game = new Game(firstPlayer, secondPlayer);
+        game.dropDisc(firstPlayer.getColour(), 0);
+        game.dropDisc(secondPlayer.getColour(), 0);
+        game.dropDisc(firstPlayer.getColour(), 1);
+        game.dropDisc(secondPlayer.getColour(), 1);
+        game.dropDisc(firstPlayer.getColour(), 2);
+        game.dropDisc(secondPlayer.getColour(), 2);
+        game.dropDisc(firstPlayer.getColour(), 3);
+
+        assertThat(game.getOutcome())
+                .isEqualTo(new Game.Outcome(firstPlayer));
     }
 
 }

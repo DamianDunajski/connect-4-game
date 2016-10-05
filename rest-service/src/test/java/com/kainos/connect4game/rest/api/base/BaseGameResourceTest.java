@@ -1,6 +1,7 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.api.base;
 
 import com.kainos.connect4game.domain.Game;
+import com.kainos.connect4game.rest.api.GameResource;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.junit.Before;
 import org.junit.ClassRule;

@@ -21,7 +21,7 @@ Note: Please make sure all requirements mentioned on the [project page](../READM
 To build the project please execute following command:
 
 ```
-mvn clean package
+mvn clean verify
 ```
 
 When build process is completed then `rest-service-1.0.0-SNAPSHOT.jar` JAR will be available in `target` directory.

@@ -1,5 +1,6 @@
 package com.kainos.connect4game.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -10,14 +11,16 @@ import static java.util.UUID.randomUUID;
 
 public class Game {
 
+    private static final OutcomeAnalyser analyser = new OutcomeAnalyser();
+
     @ApiModelProperty(value = "Unique ID of the game", required = true)
     private final UUID id;
     @ApiModelProperty(value = "Board used in the game", required = true)
     private final Board board;
     @ApiModelProperty(value = "List of players in the game", required = true)
     private final List<Player> players;
-    //
-    private Board.Field lastPopulatedField;
+    @ApiModelProperty(value = "Outcome of the game")
+    private Outcome outcome;
 
     public Game(Player... players) {
         this(randomUUID(), new Board(), new ArrayList<Player>());
@@ -45,6 +48,10 @@ public class Game {
         return Collections.unmodifiableList(players);
     }
 
+    public Outcome getOutcome() {
+        return outcome;
+    }
+
     public void addPlayer(Player player) {
         synchronized (players) {
             checkState(players.size() < 2, "Game cannot have more then 2 players");
@@ -56,9 +63,19 @@ public class Game {
 
     public void dropDisc(Player.Colour colour, int column) {
         synchronized (this) {
-            checkState(lastPopulatedField == null || lastPopulatedField.getColour() != colour, "Single player cannot drop two discs in a row");
+            checkState(board.getLastPopulatedField() == null || board.getLastPopulatedField().getColour() != colour, "Single player cannot drop two discs in a row");
+            checkState(outcome == null, "Game has already ended");
 
-            lastPopulatedField = board.dropDisc(colour, column);
+            board.dropDisc(colour, column);
+
+            analyser.determineOutcome(board).ifPresent((winningColour) -> {
+                Player winner = players.stream()
+                        .filter(player -> player.getColour() == winningColour)
+                        .findFirst()
+                        .get();
+
+                outcome = new Outcome(winner);
+            });
         }
     }
 
@@ -76,4 +93,33 @@ public class Game {
     public int hashCode() {
         return Objects.hash(id, board, players);
     }
+
+    public static class Outcome {
+
+        @ApiModelProperty(value = "Player who won the game", notes = "Draw is represented as an outcome without winner (winner is null)")
+        private final Player winner;
+
+        @JsonCreator
+        public Outcome(@JsonProperty("winner") Player winner) {
+            this.winner = winner;
+        }
+
+        public Player getWinner() {
+            return winner;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Outcome outcome = (Outcome) o;
+            return Objects.equals(winner, outcome.winner);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(winner);
+        }
+    }
+
 }

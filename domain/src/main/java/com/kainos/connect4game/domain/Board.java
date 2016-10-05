@@ -16,6 +16,8 @@ public class Board {
 
     @ApiModelProperty(value = "List of the fields on the board", required = true)
     private final List<Field> fields;
+    // internal
+    private Field lastPopulatedField;
 
     Board() {
         this.fields = new ArrayList<>(NUMBER_OF_COLUMNS * NUMBER_OF_ROWS);
@@ -31,8 +33,12 @@ public class Board {
         return Collections.unmodifiableList(fields);
     }
 
+    public Field getLastPopulatedField() {
+        return lastPopulatedField;
+    }
+
     Field dropDisc(Player.Colour colour, int column) {
-        synchronized (fields) {
+        synchronized (this) {
             checkNotNull(colour, "Colour of the disc cannot be null");
             checkArgument(column >= 0 && column < NUMBER_OF_COLUMNS, "Column " + column + " does not exist on the board");
 
@@ -42,7 +48,8 @@ public class Board {
 
             Field nextAvailableField = findNextAvailableField(column, lastOccupiedRow);
             nextAvailableField.colour = colour;
-            return nextAvailableField;
+
+            return lastPopulatedField = nextAvailableField;
         }
     }
 

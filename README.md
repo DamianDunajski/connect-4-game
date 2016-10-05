@@ -26,5 +26,5 @@ Note: This manual assumes that Maven is installed on the developer machine as me
 To build the project please execute following command:
 
 ```
-mvn clean package
+mvn clean verify
 ```

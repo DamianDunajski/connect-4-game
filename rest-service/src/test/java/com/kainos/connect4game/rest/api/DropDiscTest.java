@@ -3,6 +3,7 @@ package com.kainos.connect4game.rest.api;
 import com.kainos.connect4game.domain.Board;
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
+import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
 import org.junit.Before;
 import org.junit.Test;
 
