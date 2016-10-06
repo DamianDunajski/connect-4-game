@@ -1,6 +1,7 @@
 package com.kainos.connect4game.domain;
 
 
+import com.kainos.connect4game.domain.Game.Board;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

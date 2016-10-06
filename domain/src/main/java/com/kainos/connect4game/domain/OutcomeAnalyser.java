@@ -1,55 +1,91 @@
 package com.kainos.connect4game.domain;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class OutcomeAnalyser {
 
     public static final int WINNING_NUMBER_OF_DISCS = 4;
 
-    public Optional<Player.Colour> determineOutcome(Board board) {
-        if (board.getLastPopulatedField() != null && (areDiscsConnectedInRow(board) || areDiscsConnectedInColumn(board))) {
+    public Optional<Player.Colour> determineOutcome(Game.Board board) {
+        if (board.getLastPopulatedField() != null && (areDiscsConnectedInRow(board) || areDiscsConnectedInColumn(board)
+                || areDiscsConnectedDiagonalBottomTop(board) || areDiscsConnectedDiagonalTopBottom(board))) {
             return Optional.of(board.getLastPopulatedField().getColour());
         }
 
         return Optional.empty();
     }
 
-    private boolean areDiscsConnectedInRow(Board board) {
-        List<Integer> columnRange = IntStream.rangeClosed(board.getLastPopulatedField().getColumn() - 3, board.getLastPopulatedField().getColumn() + 3).boxed()
-                .collect(Collectors.toList());
+    private boolean areDiscsConnectedInRow(Game.Board board) {
+        Game.Board.Field.Location lastPopulatedLocation = board.getLastPopulatedField().getLocation();
+
+        List<Game.Board.Field.Location> locationRange = new ArrayList<>(7);
+        for (int column = lastPopulatedLocation.getColumn() - 3; column <= lastPopulatedLocation.getColumn() + 3; column++) {
+            locationRange.add(new Game.Board.Field.Location(column, lastPopulatedLocation.getRow()));
+        }
 
         Integer counter = board.getFields().stream()
-                .filter(field -> field.getRow() == board.getLastPopulatedField().getRow() && columnRange.contains(field.getColumn()))
-                .sorted((f1, f2) -> Integer.compare(f1.getColumn(), f2.getColumn()))
+                .filter(field -> locationRange.contains(field.getLocation()))
                 .collect(new FieldCollector(board.getLastPopulatedField().getColour()));
 
         return counter >= WINNING_NUMBER_OF_DISCS;
     }
 
-    private boolean areDiscsConnectedInColumn(Board board) {
-        List<Integer> rowRange = IntStream.rangeClosed(board.getLastPopulatedField().getRow() - 3, board.getLastPopulatedField().getRow() + 3).boxed()
-                .collect(Collectors.toList());
+    private boolean areDiscsConnectedInColumn(Game.Board board) {
+        Game.Board.Field.Location lastPopulatedLocation = board.getLastPopulatedField().getLocation();
+
+        List<Game.Board.Field.Location> locationRange = new ArrayList<>(7);
+        for (int row = lastPopulatedLocation.getRow() - 3; row <= lastPopulatedLocation.getRow() + 3; row++) {
+            locationRange.add(new Game.Board.Field.Location(lastPopulatedLocation.getColumn(), row));
+        }
 
         Integer counter = board.getFields().stream()
-                .filter(field -> field.getColumn() == board.getLastPopulatedField().getColumn() && rowRange.contains(field.getColumn()))
-                .sorted((f1, f2) -> Integer.compare(f1.getRow(), f2.getRow()))
+                .filter(field -> locationRange.contains(field.getLocation()))
                 .collect(new FieldCollector(board.getLastPopulatedField().getColour()));
 
         return counter >= WINNING_NUMBER_OF_DISCS;
     }
 
-    private class FieldCollector implements Collector<Board.Field, LongAdder, Integer> {
+    private boolean areDiscsConnectedDiagonalBottomTop(Game.Board board) {
+        Game.Board.Field.Location lastPopulatedLocation = board.getLastPopulatedField().getLocation();
+
+        int bottomRow = lastPopulatedLocation.getRow() + 3;
+
+        List<Game.Board.Field.Location> locationRange = new ArrayList<>(7);
+        for (int column = lastPopulatedLocation.getColumn() - 3; column <= lastPopulatedLocation.getColumn() + 3; column++) {
+            locationRange.add(new Game.Board.Field.Location(column, bottomRow--));
+        }
+
+        Integer counter = board.getFields().stream()
+                .filter(field -> locationRange.contains(field.getLocation()))
+                .collect(new FieldCollector(board.getLastPopulatedField().getColour()));
+
+        return counter >= WINNING_NUMBER_OF_DISCS;
+    }
+
+    private boolean areDiscsConnectedDiagonalTopBottom(Game.Board board) {
+        Game.Board.Field.Location lastPopulatedLocation = board.getLastPopulatedField().getLocation();
+
+        int topRow = lastPopulatedLocation.getRow() - 3;
+
+        List<Game.Board.Field.Location> locationRange = new ArrayList<>(7);
+        for (int column = lastPopulatedLocation.getColumn() - 3; column <= lastPopulatedLocation.getColumn() + 3; column++) {
+            locationRange.add(new Game.Board.Field.Location(column, topRow++));
+        }
+
+        Integer counter = board.getFields().stream()
+                .filter(field -> locationRange.contains(field.getLocation()))
+                .collect(new FieldCollector(board.getLastPopulatedField().getColour()));
+
+        return counter >= WINNING_NUMBER_OF_DISCS;
+    }
+
+    private class FieldCollector implements Collector<Game.Board.Field, LongAdder, Integer> {
 
         private final Player.Colour colour;
 
@@ -63,7 +99,7 @@ public class OutcomeAnalyser {
         }
 
         @Override
-        public BiConsumer<LongAdder, Board.Field> accumulator() {
+        public BiConsumer<LongAdder, Game.Board.Field> accumulator() {
             return (counter, field) -> {
                 if (field.getColour() == this.colour) {
                     counter.increment();

@@ -1,5 +1,6 @@
 package com.kainos.connect4game.domain;
 
+import com.kainos.connect4game.domain.Game.Board;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -13,13 +14,13 @@ public class BoardTest {
 
         board.dropDisc(Player.Colour.Red, 0);
         assertThat(board.getFields())
-                .filteredOn(field -> field.getColumn() == 0 && field.getColour() != null)
-                .containsOnly(new Board.Field(0, 5, Player.Colour.Red));
+                .filteredOn(field -> field.getLocation().getColumn() == 0 && field.getColour() != null)
+                .containsOnly(new Board.Field(new Board.Field.Location(0, 5), Player.Colour.Red));
 
         board.dropDisc(Player.Colour.Yellow, 0);
         assertThat(board.getFields())
-                .filteredOn(field -> field.getColumn() == 0 && field.getColour() != null)
-                .containsOnly(new Board.Field(0, 4, Player.Colour.Yellow), new Board.Field(0, 5, Player.Colour.Red));
+                .filteredOn(field -> field.getLocation().getColumn() == 0 && field.getColour() != null)
+                .containsOnly(new Board.Field(new Board.Field.Location(0, 4), Player.Colour.Yellow), new Board.Field(new Board.Field.Location(0, 5), Player.Colour.Red));
     }
 
     @Test

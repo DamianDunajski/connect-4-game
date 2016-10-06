@@ -2,6 +2,7 @@ package com.kainos.connect4game.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
@@ -47,6 +48,14 @@ public class Player {
     @Override
     public int hashCode() {
         return Objects.hash(name, colour);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("name", name)
+                .add("colour", colour)
+                .toString();
     }
 
     public enum Colour {

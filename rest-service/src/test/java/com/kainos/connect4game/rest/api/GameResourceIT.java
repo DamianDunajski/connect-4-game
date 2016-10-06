@@ -17,34 +17,56 @@ public class GameResourceIT extends BaseGameResourceIT {
 
     private final Client client = new JerseyClientBuilder().build();
 
-    private final Player firstPlayer = new Player("John", Player.Colour.Red);
-    private final Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
+    private final Player redPlayer = new Player("John", Player.Colour.Red);
+    private final Player yellowPlayer = new Player("Carl", Player.Colour.Yellow);
 
     @Test
     public void gameShouldEndWhenPlayerConnectsFourDiscs() {
         // John creates game
-        Game game = makeCreateGameRequest(firstPlayer);
+        Game game = makeCreateGameRequest(redPlayer);
         assertThat(game.getPlayers()).hasSize(1);
 
         // Carl joins the game
-        game = makeJoinGameRequest(game, secondPlayer);
+        game = makeJoinGameRequest(game, yellowPlayer);
         assertThat(game.getPlayers()).hasSize(2);
 
         // Players play the game
-        game = makeDropDiscRequest(game, firstPlayer.getColour(), 0);
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 3);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, secondPlayer.getColour(), 0);
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 2);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, firstPlayer.getColour(), 1);
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 4);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, secondPlayer.getColour(), 1);
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 5);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, firstPlayer.getColour(), 2);
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 3);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, secondPlayer.getColour(), 2);
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 3);
         assertThat(game.getOutcome()).isNull();
-        game = makeDropDiscRequest(game, firstPlayer.getColour(), 3);
-        assertThat(game.getOutcome()).isEqualTo(new Game.Outcome(firstPlayer));
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 4);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 2);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 5);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 1);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 6);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 6);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 2);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 6);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 3);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 4);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, yellowPlayer.getColour(), 5);
+        assertThat(game.getOutcome()).isNull();
+        game = makeDropDiscRequest(game, redPlayer.getColour(), 4);
+        assertThat(game.getOutcome().getWinner()).isEqualTo(redPlayer);
     }
 
     private Game makeCreateGameRequest(Player player) {

@@ -1,7 +1,7 @@
 package com.kainos.connect4game.rest.api;
 
-import com.kainos.connect4game.domain.Board;
 import com.kainos.connect4game.domain.Game;
+import com.kainos.connect4game.domain.Game.Board;
 import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
 import org.junit.Before;
@@ -33,11 +33,11 @@ public class DropDiscTest extends BaseGameResourceTest {
 
         assertThat(game.getId()).isEqualTo(existingGame.getId());
         assertThat(game.getBoard().getFields())
-                .filteredOn(field -> field.getColumn() == 0 && field.getColour() != null)
+                .filteredOn(field -> field.getLocation().getColumn() == 0 && field.getColour() != null)
                 .hasSize(1)
                 .first()
-                .hasFieldOrPropertyWithValue("column", 0)
-                .hasFieldOrPropertyWithValue("row", 5)
+                .hasFieldOrPropertyWithValue("location.column", 0)
+                .hasFieldOrPropertyWithValue("location.row", 5)
                 .hasFieldOrPropertyWithValue("colour", Player.Colour.Red);
     }
 

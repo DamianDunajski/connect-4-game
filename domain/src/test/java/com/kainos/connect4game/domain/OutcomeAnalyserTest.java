@@ -29,20 +29,60 @@ public class OutcomeAnalyserTest {
         return Arrays.asList(new Object[][]{
                 {newArrayList(), Optional.empty()},
                 // discs connected in a row
-                {newArrayList(redIntoColumn(0), redIntoColumn(1), redIntoColumn(2), redIntoColumn(3)), Optional.of(Player.Colour.Red)},
-                {newArrayList(redIntoColumn(1), redIntoColumn(2), redIntoColumn(3), redIntoColumn(4)), Optional.of(Player.Colour.Red)},
-                {newArrayList(redIntoColumn(2), redIntoColumn(3), redIntoColumn(4), redIntoColumn(5)), Optional.of(Player.Colour.Red)},
-                {newArrayList(redIntoColumn(3), redIntoColumn(4), redIntoColumn(5), redIntoColumn(6)), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        redIntoColumn(0), redIntoColumn(1), redIntoColumn(2), redIntoColumn(3)
+                ), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        redIntoColumn(1), redIntoColumn(2), redIntoColumn(3), redIntoColumn(4)
+                ), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        redIntoColumn(2), redIntoColumn(3), redIntoColumn(4), redIntoColumn(5)
+                ), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        redIntoColumn(3), redIntoColumn(4), redIntoColumn(5), redIntoColumn(6)
+                ), Optional.of(Player.Colour.Red)},
                 // discs connected in a column
-                {newArrayList(redIntoColumn(0), redIntoColumn(0), redIntoColumn(0), redIntoColumn(0)), Optional.of(Player.Colour.Red)},
-                {newArrayList(yellowIntoColumn(0), redIntoColumn(0), redIntoColumn(0), redIntoColumn(0), redIntoColumn(0)), Optional.of(Player.Colour.Red)},
-                {newArrayList(yellowIntoColumn(0), yellowIntoColumn(0), redIntoColumn(0), redIntoColumn(0), redIntoColumn(0), redIntoColumn(0)), Optional.of(Player.Colour.Red)}
+                {newArrayList(
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0)
+                ), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        yellowIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0)
+                ), Optional.of(Player.Colour.Red)},
+                {newArrayList(
+                        yellowIntoColumn(0),
+                        yellowIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0),
+                        redIntoColumn(0)
+                ), Optional.of(Player.Colour.Red)},
+                // discs connected diagonal (bottom - top)
+                {newArrayList(
+                        redIntoColumn(0), yellowIntoColumn(1), redIntoColumn(2), yellowIntoColumn(3),
+                        redIntoColumn(1), yellowIntoColumn(2), redIntoColumn(3),
+                        redIntoColumn(2), yellowIntoColumn(3),
+                        redIntoColumn(3)
+                ), Optional.of(Player.Colour.Red)},
+                // discs connected diagonal (top - bottom)
+                {newArrayList(
+                        yellowIntoColumn(0), redIntoColumn(1), yellowIntoColumn(2), redIntoColumn(3),
+                        redIntoColumn(0), yellowIntoColumn(1), redIntoColumn(2),
+                        yellowIntoColumn(0), redIntoColumn(1),
+                        redIntoColumn(0)
+                ), Optional.of(Player.Colour.Red)}
         });
     }
 
     @Test
     public void winningColourShouldMatchExpectation() {
-        Board board = new Board();
+        Game.Board board = new Game.Board();
         for (Drop drop : discDrops) {
             board.dropDisc(drop.colour, drop.column);
         }
