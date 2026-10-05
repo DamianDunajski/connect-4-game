@@ -1,7 +1,8 @@
-#### Maven ####
+#### Gradle ####
 
-.mvn/wrapper/maven-wrapper.jar
-target/
+gradle/wrapper/gradle-wrapper.jar
+.gradle/
+build/
 
 #### JetBrains ####
 

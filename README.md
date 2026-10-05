@@ -29,14 +29,14 @@ Project is built from following components:
 
 To work with the project following tools must be installed on the developer machine:
 
-- [Maven](http://maven.apache.org)
+- [Gradle](https://gradle.org)
 
 ### How to build it
 
-Note: This manual assumes that Maven is installed on the developer machine as mentioned above.
+Note: This manual assumes that Gradle is installed on the developer machine as mentioned above.
 
 To build the project please execute following command:
 
 ```
-mvn clean verify
+./gradlew clean build
 ```

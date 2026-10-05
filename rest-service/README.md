@@ -21,17 +21,17 @@ Note: Please make sure all requirements mentioned on the [project page](../READM
 To build the project please execute following command:
 
 ```
-mvn clean verify
+./gradlew clean build
 ```
 
-When build process is completed then `rest-service-1.0.0-SNAPSHOT.jar` JAR will be available in `target` directory.
+When build process is completed then `rest-service-1.0.0-SNAPSHOT.jar` JAR will be available in `build/libs` directory.
 
 ### How to run it
 
 To run REST service please execute following command from module root directory:
 
 ```
-java -jar target/rest-service-1.0.0-SNAPSHOT.jar server
+java -jar build/libs/rest-service-1.0.0-SNAPSHOT.jar server
 ```
 
 Above command will launch HTTP service on port `8080`.

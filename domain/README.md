@@ -11,7 +11,7 @@ Note: Please make sure all requirements mentioned on the [project page](../READM
 To build the project please execute following command:
 
 ```
-mvn clean install
+./gradlew clean build
 ```
 
-When build process is completed then `domain-1.0.0-SNAPSHOT.jar` JAR will be available in `target` directory.
+When build process is completed then `domain-1.0.0-SNAPSHOT.jar` JAR will be available in `build/libs` directory.

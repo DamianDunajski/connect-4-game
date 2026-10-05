@@ -1,0 +1,23 @@
+# https://docs.gradle.org/current/userguide/version_catalogs.html#sec::toml-dependencies-format
+
+[versions]
+com-fasterxml-jackson-core-jackson-annotations = "2.7.6"
+com-google-guava-guava = "19.0"
+com-smoketurner-dropwizard-swagger = "1.0.0-1"
+io-dropwizard-dropwizard-core = "1.0.2"
+io-dropwizard-dropwizard-testing = "1.0.2"
+io-swagger-swagger-annotations = "1.5.9"
+javax-validation-validation-api = "1.1.0.Final"
+javax-xml-bind-jaxb-api = "2.3.1"
+org-glassfish-jaxb-jaxb-runtime = "2.3.9"
+
+[libraries]
+com-fasterxml-jackson-core-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "com-fasterxml-jackson-core-jackson-annotations" }
+com-google-guava-guava = { module = "com.google.guava:guava", version.ref = "com-google-guava-guava" }
+com-smoketurner-dropwizard-swagger = { module = "com.smoketurner:dropwizard-swagger", version.ref = "com-smoketurner-dropwizard-swagger" }
+io-dropwizard-dropwizard-core = { module = "io.dropwizard:dropwizard-core", version.ref = "io-dropwizard-dropwizard-core" }
+io-dropwizard-dropwizard-testing = { module = "io.dropwizard:dropwizard-testing", version.ref = "io-dropwizard-dropwizard-testing" }
+io-swagger-swagger-annotations = { module = "io.swagger:swagger-annotations", version.ref = "io-swagger-swagger-annotations" }
+javax-validation-validation-api = { module = "javax.validation:validation-api", version.ref = "javax-validation-validation-api" }
+javax-xml-bind-jaxb-api = { module = "javax.xml.bind:jaxb-api", version.ref = "javax-xml-bind-jaxb-api" }
+org-glassfish-jaxb-jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "org-glassfish-jaxb-jaxb-runtime" }
