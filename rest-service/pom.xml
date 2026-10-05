@@ -31,6 +31,19 @@
             <artifactId>dropwizard-swagger</artifactId>
             <version>${dropwizard-swagger.version}</version>
         </dependency>
+        <!-- Legacy JAXB API (provides javax.xml.bind.* classes) -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <!-- Legacy JAXB Runtime Implementation -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.9</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>io.dropwizard</groupId>
