@@ -24,15 +24,15 @@ class JoinGameTest extends BaseGameResourceTest {
 
     @BeforeEach
     void initGames() {
-        games.add(existingGame);
+        games.put(existingGame.id(), existingGame);
     }
 
     @Test
     void shouldReturnUpdatedGameWithSecondPlayerOnThePlayersList() {
-        Game game = makeJoinGameRequest(existingGame.getId(), secondPlayer);
+        Game game = makeJoinGameRequest(existingGame.id(), secondPlayer);
 
-        assertThat(game.getId()).isEqualTo(existingGame.getId());
-        assertThat(game.getPlayers()).containsOnly(firstPlayer, secondPlayer);
+        assertThat(game.id()).isEqualTo(existingGame.id());
+        assertThat(game.players()).containsOnly(firstPlayer, secondPlayer);
     }
 
     @Test
@@ -44,16 +44,16 @@ class JoinGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Carl", Colour.Red)))
+        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.id(), new Player("Carl", Colour.Red)))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }
 
     @Test
     void shouldReturn500ResponseWhenThirdPlayerJoins() {
-        existingGame.addPlayer(secondPlayer);
+        games.computeIfPresent(existingGame.id(), (_, game) -> game.addPlayer(secondPlayer));
 
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Stephanie", Colour.Yellow)))
+        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.id(), new Player("Stephanie", Colour.Yellow)))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }

@@ -20,7 +20,7 @@ dependencies {
 
 group = "com.kainos.connect-4-game"
 version = "1.0.0-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 publishing {
     publications.create<MavenPublication>("maven") {

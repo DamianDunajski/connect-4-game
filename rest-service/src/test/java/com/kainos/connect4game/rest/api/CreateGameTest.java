@@ -18,8 +18,8 @@ class CreateGameTest extends BaseGameResourceTest {
         Game firstGame = makeCreateGameRequest(player);
         Game secondGame = makeCreateGameRequest(player);
 
-        assertThat(firstGame.getId())
-                .isNotEqualByComparingTo(secondGame.getId())
+        assertThat(firstGame.id())
+                .isNotEqualByComparingTo(secondGame.id())
                 .isNotNull();
     }
 
@@ -27,9 +27,9 @@ class CreateGameTest extends BaseGameResourceTest {
     void shouldReturnGameWithProperlySizedBlankBoard() {
         Game game = makeCreateGameRequest(player);
 
-        assertThat(game.getBoard().getFields())
+        assertThat(game.board().fields())
                 .hasSize(Board.NUMBER_OF_COLUMNS * Board.NUMBER_OF_ROWS)
-                .filteredOn(field -> field.getColour() != null)
+                .filteredOn(field -> field.colour() != null)
                 .isEmpty();
     }
 
@@ -37,14 +37,14 @@ class CreateGameTest extends BaseGameResourceTest {
     void shouldReturnGameWithFirstPlayerOnThePlayersList() {
         Game game = makeCreateGameRequest(player);
 
-        assertThat(game.getPlayers()).containsOnly(player);
+        assertThat(game.players()).containsOnly(player);
     }
 
     @Test
     void shouldAddCreatedGameToTheListOfGamesInProgress() {
         Game game = makeCreateGameRequest(player);
 
-        assertThat(games).containsOnly(game);
+        assertThat(games).containsValues(game);
     }
 
     private Game makeCreateGameRequest(Player player) {

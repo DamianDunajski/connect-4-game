@@ -10,8 +10,7 @@ class GameTest {
 
     @Test
     void shouldThrowAnExceptionWhenSecondPlayerHasChosenTheSameColourAsFirstPlayer() {
-        Game game = new Game();
-        game.addPlayer(new Player("John", Player.Colour.Red));
+        Game game = new Game().addPlayer(new Player("John", Player.Colour.Red));
 
         assertThatThrownBy(() -> game.addPlayer(new Player("Carl", Player.Colour.Red)))
                 .isExactlyInstanceOf(IllegalStateException.class)
@@ -20,22 +19,21 @@ class GameTest {
 
     @Test
     void shouldThrowAnExceptionWhenThirdPlayerIsBeingAdded() {
-        Game game = new Game();
-        game.addPlayer(new Player("John", Player.Colour.Red));
-        game.addPlayer(new Player("Carl", Player.Colour.Yellow));
+        Game game = new Game()
+                .addPlayer(new Player("John", Player.Colour.Red))
+                .addPlayer(new Player("Carl", Player.Colour.Yellow));
 
         assertThatThrownBy(() -> game.addPlayer(new Player("Stephanie", Player.Colour.Yellow)))
                 .isExactlyInstanceOf(IllegalStateException.class)
-                .hasMessage("Game cannot have more then 2 players");
+                .hasMessage("Game cannot have more than 2 players");
     }
 
     @Test
     void shouldThrowAnExceptionWhenTheSamePlayerIsMakingTwoConsecutiveDrops() {
         Player player = new Player("John", Player.Colour.Red);
-        Game game = new Game(player);
-        game.dropDisc(player.getColour(), 0);
+        Game game = new Game(player).dropDisc(player.colour(), 0);
 
-        assertThatThrownBy(() -> game.dropDisc(player.getColour(), 0))
+        assertThatThrownBy(() -> game.dropDisc(player.colour(), 0))
                 .isExactlyInstanceOf(IllegalStateException.class)
                 .hasMessage("Single player cannot drop two discs in a row");
     }
@@ -44,16 +42,16 @@ class GameTest {
     void shouldThrowAnExceptionWhenOutcomeHasBeenDeterminedButPlayersContinueDroppingDiscs() {
         Player firstPlayer = new Player("John", Player.Colour.Red);
         Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
-        Game game = new Game(firstPlayer, secondPlayer);
-        game.dropDisc(firstPlayer.getColour(), 0);
-        game.dropDisc(secondPlayer.getColour(), 0);
-        game.dropDisc(firstPlayer.getColour(), 1);
-        game.dropDisc(secondPlayer.getColour(), 1);
-        game.dropDisc(firstPlayer.getColour(), 2);
-        game.dropDisc(secondPlayer.getColour(), 2);
-        game.dropDisc(firstPlayer.getColour(), 3);
+        Game game = new Game(firstPlayer, secondPlayer)
+                .dropDisc(firstPlayer.colour(), 0)
+                .dropDisc(secondPlayer.colour(), 0)
+                .dropDisc(firstPlayer.colour(), 1)
+                .dropDisc(secondPlayer.colour(), 1)
+                .dropDisc(firstPlayer.colour(), 2)
+                .dropDisc(secondPlayer.colour(), 2)
+                .dropDisc(firstPlayer.colour(), 3);
 
-        assertThatThrownBy(() -> game.dropDisc(secondPlayer.getColour(), 3))
+        assertThatThrownBy(() -> game.dropDisc(secondPlayer.colour(), 3))
                 .isExactlyInstanceOf(IllegalStateException.class)
                 .hasMessage("Game has already ended");
     }
@@ -62,16 +60,16 @@ class GameTest {
     void shouldHaveOutcomeWhenFourDiscsHasBeenConnected() {
         Player firstPlayer = new Player("John", Player.Colour.Red);
         Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
-        Game game = new Game(firstPlayer, secondPlayer);
-        game.dropDisc(firstPlayer.getColour(), 0);
-        game.dropDisc(secondPlayer.getColour(), 0);
-        game.dropDisc(firstPlayer.getColour(), 1);
-        game.dropDisc(secondPlayer.getColour(), 1);
-        game.dropDisc(firstPlayer.getColour(), 2);
-        game.dropDisc(secondPlayer.getColour(), 2);
-        game.dropDisc(firstPlayer.getColour(), 3);
+        Game game = new Game(firstPlayer, secondPlayer)
+                .dropDisc(firstPlayer.colour(), 0)
+                .dropDisc(secondPlayer.colour(), 0)
+                .dropDisc(firstPlayer.colour(), 1)
+                .dropDisc(secondPlayer.colour(), 1)
+                .dropDisc(firstPlayer.colour(), 2)
+                .dropDisc(secondPlayer.colour(), 2)
+                .dropDisc(firstPlayer.colour(), 3);
 
-        assertThat(game.getOutcome())
+        assertThat(game.outcome())
                 .isEqualTo(new Game.Outcome(firstPlayer));
     }
 

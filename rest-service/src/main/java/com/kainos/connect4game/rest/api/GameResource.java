@@ -13,18 +13,18 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.Optional;
+
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Path("/game/connect-4")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Connect 4", description = "Game API")
 public class GameResource {
 
-    private List<Game> gamesInProgress;
+    private final ConcurrentHashMap<UUID, Game> gamesInProgress;
 
-    public GameResource(List<Game> gamesInProgress) {
+    public GameResource(ConcurrentHashMap<UUID, Game> gamesInProgress) {
         this.gamesInProgress = gamesInProgress;
     }
 
@@ -36,11 +36,8 @@ public class GameResource {
             @ApiResponse(responseCode = "500", description = "Error occurred - game has not been created")
     })
     public Game createGame(@Parameter(name = "player", description = "Player who starts new game", required = true) @NotNull @Valid Player player) {
-        Game game = new Game();
-        game.addPlayer(player);
-
-        this.gamesInProgress.add(game);
-
+        Game game = new Game(player);
+        this.gamesInProgress.put(game.id(), game);
         return game;
     }
 
@@ -55,9 +52,11 @@ public class GameResource {
     })
     public Game joinGame(@Parameter(name = "id", description = "ID of the game to join", required = true) @PathParam("id") UUID id,
                          @Parameter(name = "player", description = "Player who joins existing game", required = true) @NotNull @Valid Player player) {
-        Game game = findGameByID(id).orElseThrow(() -> new WebApplicationException(404));
-        game.addPlayer(player);
-        return game;
+        Game mutatedGame = this.gamesInProgress.computeIfPresent(id, (_, game) -> game.addPlayer(player));
+        if (mutatedGame == null) {
+            throw new WebApplicationException(404);
+        }
+        return mutatedGame;
     }
 
     @Timed
@@ -72,13 +71,11 @@ public class GameResource {
     public Game dropDisc(@Parameter(name = "id", description = "ID of the game", required = true) @PathParam("id") UUID id,
                          @Parameter(name = "colour", description = "Colour of the disc being dropped", required = true) @PathParam("colour") Player.Colour colour,
                          @Parameter(name = "column", description = "Column the disc being dropped into", required = true) @PathParam("column") int column) {
-        Game game = findGameByID(id).orElseThrow(() -> new WebApplicationException(404));
-        game.dropDisc(colour, column);
-        return game;
-    }
-
-    private Optional<Game> findGameByID(UUID id) {
-        return this.gamesInProgress.stream().filter(game -> game.getId().equals(id)).findFirst();
+        Game mutatedGame = gamesInProgress.computeIfPresent(id, (_, game) -> game.dropDisc(colour, column));
+        if (mutatedGame == null) {
+            throw new WebApplicationException(404);
+        }
+        return mutatedGame;
     }
 
 }

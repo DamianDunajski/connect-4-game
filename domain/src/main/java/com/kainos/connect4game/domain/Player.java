@@ -1,61 +1,21 @@
 package com.kainos.connect4game.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-//import javax.validation.constraints.NotNull;
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public record Player(
+        @Schema(description = "Name of the player", example = "John")
+        String name,
+        @Schema(description = "Colour selected by the player", example = "Red")
+        Colour colour
+) {
 
-public class Player {
-
-//    @NotNull(message = "Player name cannot be null")
-    @Schema(description = "Name of the player", required = true, example = "John")
-    private final String name;
-//    @NotNull(message = "Player colour cannot be null")
-    @Schema(description = "Colour selected by the player", required = true, example = "Red")
-    private final Colour colour;
-
-    @JsonCreator
-    public Player(@JsonProperty("name") String name, @JsonProperty("colour") Colour colour) {
-        checkNotNull(name, "Player name cannot be null");
-        checkNotNull(colour, "Player colour cannot be null");
-
+    public Player(String name, Colour colour) {
+        requireNonNull(name, "Player name cannot be null");
+        requireNonNull(colour, "Player colour cannot be null");
         this.name = name;
         this.colour = colour;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Colour getColour() {
-        return colour;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return Objects.equals(name, player.name) &&
-                colour == player.colour;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, colour);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("name", name)
-                .add("colour", colour)
-                .toString();
     }
 
     public enum Colour {

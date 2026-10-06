@@ -1,155 +1,137 @@
 package com.kainos.connect4game.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
 import com.kainos.connect4game.domain.Game.Board.Field.Location;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.*;
+import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
 
-public class Game {
+public record Game(
+        @Schema(description = "Unique ID of the game")
+        UUID id,
+        @Schema(description = "Board used in the game")
+        Board board,
+        @Schema(description = "List of players in the game")
+        List<Player> players,
+        @Schema(description = "Outcome of the game")
+        Outcome outcome
+) {
 
     private static final OutcomeAnalyser analyser = new OutcomeAnalyser();
 
-    @Schema(description = "Unique ID of the game")
-    private final UUID id;
-    @Schema(description = "Board used in the game")
-    private final Board board;
-    @Schema(description = "List of players in the game")
-    private final List<Player> players;
-    @Schema(description = "Outcome of the game")
-    private Outcome outcome;
-
     public Game(Player... players) {
-        this(randomUUID(), new Board(), new ArrayList<Player>());
-
-        for (Player player : players) {
-            addPlayer(player);
-        }
+        this(randomUUID(), new Board(), List.of(players), null);
     }
 
-    public Game(@JsonProperty("id") UUID id, @JsonProperty("board") Board board, @JsonProperty("players") List<Player> players) {
+    public Game(UUID id, Board board, List<Player> players, Outcome outcome) {
+        checkPlayers(players);
         this.id = id;
         this.board = board;
         this.players = players;
+        this.outcome = outcome;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public Board getBoard() {
-        return board;
-    }
-
-    public List<Player> getPlayers() {
-        return Collections.unmodifiableList(players);
-    }
-
-    public Outcome getOutcome() {
-        return outcome;
-    }
-
-    public void addPlayer(Player player) {
-        synchronized (players) {
-            checkState(players.size() < 2, "Game cannot have more then 2 players");
-            checkState(players.stream().noneMatch(p -> p.getColour().equals(player.getColour())), "Two players cannot choose the same colour");
-
-            players.add(player);
+    private void checkPlayers(List<Player> players) {
+        if (players.size() > 2) {
+            throw new IllegalStateException("Game cannot have more than 2 players");
+        }
+        Map<Player.Colour, List<Player>> playersByColour = players.stream().collect(Collectors.groupingBy(Player::colour));
+        if (playersByColour.values().stream().anyMatch(groupedPlayers -> groupedPlayers.size() > 1)) {
+            throw new IllegalStateException("Two players cannot choose the same colour");
         }
     }
 
-    public void dropDisc(Player.Colour colour, int column) {
-        synchronized (this) {
-            checkState(board.getLastPopulatedField() == null || board.getLastPopulatedField().getColour() != colour, "Single player cannot drop two discs in a row");
-            checkState(outcome == null, "Game has already ended");
+    public Game addPlayer(Player player) {
+        return new Game(
+                id,
+                board,
+                Stream.concat(this.players.stream(), Stream.of(player)).toList(),
+                outcome
+        );
+    }
 
-            board.dropDisc(colour, column);
-
-            analyser.determineOutcome(board).ifPresent((winningColour) -> {
-                Player winner = players.stream()
-                        .filter(player -> player.getColour() == winningColour)
-                        .findFirst()
-                        .get();
-
-                outcome = new Outcome(winner);
-            });
+    public Game dropDisc(Player.Colour colour, int column) {
+        if (outcome != null) {
+            throw new IllegalStateException("Game has already ended");
         }
+        if (board.lastPopulatedField != null && board.lastPopulatedField.colour == colour) {
+            throw new IllegalStateException("Single player cannot drop two discs in a row");
+        }
+
+        Board updatedBoard = board.dropDisc(colour, column);
+
+        return analyser.determineOutcome(updatedBoard)
+                .map(winningColour -> {
+                    Player winner = players.stream()
+                            .filter(player -> player.colour() == winningColour)
+                            .findFirst()
+                            .orElseThrow();
+                    return new Game(
+                            id,
+                            updatedBoard,
+                            players,
+                            new Outcome(winner)
+                    );
+                }).orElseGet(() -> new Game(
+                        id,
+                        updatedBoard,
+                        players,
+                        null
+                ));
+
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Game game = (Game) o;
-        return Objects.equals(id, game.id) &&
-                Objects.equals(board, game.board) &&
-                Objects.equals(players, game.players) &&
-                Objects.equals(outcome, game.outcome);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, board, players, outcome);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("board", board)
-                .add("players", players)
-                .add("outcome", outcome)
-                .toString();
-    }
-
-    public static class Board {
+    public record Board(
+            @Schema(description = "List of the fields on the board")
+            List<Field> fields,
+            @Schema(description = "Field populated by last player's move")
+            Field lastPopulatedField
+    ) {
 
         public static final int NUMBER_OF_COLUMNS = 7;
         public static final int NUMBER_OF_ROWS = 6;
 
-        @Schema(description = "List of the fields on the board")
-        private final List<Field> fields;
-        @Schema(description = "Field populated by last player's move")
-        private Field lastPopulatedField;
-
         Board() {
-            this.fields = new ArrayList<>(NUMBER_OF_COLUMNS * NUMBER_OF_ROWS);
-
+            List<Field> fields = new ArrayList<>(NUMBER_OF_COLUMNS * NUMBER_OF_ROWS);
             for (int column = 0; column < NUMBER_OF_COLUMNS; column++) {
                 for (int row = 0; row < NUMBER_OF_ROWS; row++) {
-                    this.fields.add(new Field(new Location(column, row)));
+                    fields.add(new Field(new Location(column, row)));
                 }
             }
+            this(List.copyOf(fields), null);
         }
 
-        public List<Field> getFields() {
-            return Collections.unmodifiableList(fields);
-        }
-
-        public Field getLastPopulatedField() {
-            return lastPopulatedField;
-        }
-
-        Field dropDisc(Player.Colour colour, int column) {
-            synchronized (this) {
-                checkNotNull(colour, "Colour of the disc cannot be null");
-                checkArgument(column >= 0 && column < NUMBER_OF_COLUMNS, "Column " + column + " does not exist on the board");
-
-                OptionalInt lastOccupiedRow = findLastOccupiedRow(column);
-
-                lastOccupiedRow.ifPresent((row) -> checkState(row != 0, "Column " + column + " is already full"));
-
-                Field nextAvailableField = findNextAvailableField(column, lastOccupiedRow);
-                nextAvailableField.colour = colour;
-
-                return lastPopulatedField = nextAvailableField;
+        Board dropDisc(Player.Colour colour, int column) {
+            requireNonNull(colour, "Colour of the disc cannot be null");
+            if (column < 0 || column >= NUMBER_OF_COLUMNS) {
+                throw new IllegalArgumentException("Column " + column + " does not exist on the board");
             }
+
+            OptionalInt lastOccupiedRow = findLastOccupiedRow(column);
+            lastOccupiedRow.ifPresent((row) -> {
+                if (row == 0) {
+                    throw new IllegalStateException("Column " + column + " is already full");
+                }
+            });
+
+            Location discLocation = findNextAvailableField(column, lastOccupiedRow).location;
+
+            return new Board(
+                    fields.stream().map(field ->
+                            field.location().equals(discLocation)
+                                    ? new Field(field.location(), colour)
+                                    : field
+                    ).toList(),
+                    new Field(
+                            discLocation,
+                            colour
+                    )
+            );
         }
 
         private OptionalInt findLastOccupiedRow(int column) {
@@ -166,154 +148,30 @@ public class Game {
                     .get();
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Board board = (Board) o;
-            return Objects.equals(fields, board.fields) &&
-                    Objects.equals(lastPopulatedField, board.lastPopulatedField);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(fields, lastPopulatedField);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("fields", fields)
-                    .add("lastPopulatedField", lastPopulatedField)
-                    .toString();
-        }
-
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        public static class Field {
-
-            @Schema(description = "Location of the field on the board")
-            private Location location;
-            @Schema(description = "Colour of the field (null means field not filled)")
-            private Player.Colour colour;
-
+        public record Field(
+                @Schema(description = "Location of the field on the board")
+                Location location,
+                @Schema(description = "Colour of the field (null means field not filled)")
+                Player.Colour colour
+        ) {
             Field(Location location) {
                 this(location, null);
             }
 
-            @JsonCreator
-            Field(@JsonProperty("location") Location location, @JsonProperty("colour") Player.Colour colour) {
-                this.location = location;
-                this.colour = colour;
-            }
-
-            public Location getLocation() {
-                return location;
-            }
-
-            public Player.Colour getColour() {
-                return colour;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                Field field = (Field) o;
-                return Objects.equals(location, field.location) &&
-                        colour == field.colour;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(location, colour);
-            }
-
-            @Override
-            public String toString() {
-                return MoreObjects.toStringHelper(this)
-                        .add("location", location)
-                        .add("colour", colour)
-                        .toString();
-            }
-
-            public static class Location {
-
-                @Schema(description = "Number of column (starting with 0 - top left corner)")
-                private int column;
-                @Schema(description = "Number of row (starting with 0 - top left corner)")
-                private int row;
-
-                @JsonCreator
-                Location(@JsonProperty("column") int column, @JsonProperty("row") int row) {
-                    this.column = column;
-                    this.row = row;
-                }
-
-                public int getColumn() {
-                    return column;
-                }
-
-                public int getRow() {
-                    return row;
-                }
-
-                @Override
-                public boolean equals(Object o) {
-                    if (this == o) return true;
-                    if (o == null || getClass() != o.getClass()) return false;
-                    Location location = (Location) o;
-                    return column == location.column &&
-                            row == location.row;
-                }
-
-                @Override
-                public int hashCode() {
-                    return Objects.hash(column, row);
-                }
-
-                @Override
-                public String toString() {
-                    return MoreObjects.toStringHelper(this)
-                            .add("column", column)
-                            .add("row", row)
-                            .toString();
-                }
+            public record Location(
+                    @Schema(description = "Number of column (starting with 0 - top left corner)")
+                    int column,
+                    @Schema(description = "Number of row (starting with 0 - top left corner)")
+                    int row
+            ) {
             }
         }
     }
 
-    public static class Outcome {
-
-        @Schema(description = "Player who won the game (draw is represented as an outcome without winner (winner is null))")
-        private final Player winner;
-
-        @JsonCreator
-        Outcome(@JsonProperty("winner") Player winner) {
-            this.winner = winner;
-        }
-
-        public Player getWinner() {
-            return winner;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Outcome outcome = (Outcome) o;
-            return Objects.equals(winner, outcome.winner);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(winner);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("winner", winner)
-                    .toString();
-        }
+    public record Outcome(
+            @Schema(description = "Player who won the game (draw is represented as an outcome without winner (winner is null))")
+            Player winner
+    ) {
     }
 }

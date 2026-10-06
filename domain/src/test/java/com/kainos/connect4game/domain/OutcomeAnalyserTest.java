@@ -75,7 +75,7 @@ class OutcomeAnalyserTest {
     void winningColourShouldMatchExpectation(List<Drop> discDrops, Optional<Player.Colour> outcome) {
         Game.Board board = new Game.Board();
         for (Drop drop : discDrops) {
-            board.dropDisc(drop.colour, drop.column);
+            board = board.dropDisc(drop.colour, drop.column);
         }
 
         Assertions.assertThat(analyser.determineOutcome(board))

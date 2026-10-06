@@ -9,15 +9,15 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Application extends io.dropwizard.core.Application<Configuration> {
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         new Application().run(args);
     }
 
     public void run(Configuration configuration, Environment environment) {
-        environment.jersey().register(new GameResource(new CopyOnWriteArrayList<>()));
+        environment.jersey().register(new GameResource(new ConcurrentHashMap<>()));
 
         try {
             new JaxrsOpenApiContextBuilder<>()

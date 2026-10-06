@@ -24,16 +24,16 @@ class DropDiscTest extends BaseGameResourceTest {
 
     @BeforeEach
     void initGames() {
-        games.add(existingGame);
+        games.put(existingGame.id(), existingGame);
     }
 
     @Test
     void shouldReturnUpdatedGameWithDroppedDiscReflectedOnTheBoard() {
-        Game game = makeDropDiscRequest(existingGame.getId(), firstPlayer.getColour(), 0);
+        Game game = makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 0);
 
-        assertThat(game.getId()).isEqualTo(existingGame.getId());
-        assertThat(game.getBoard().getFields())
-                .filteredOn(field -> field.getLocation().getColumn() == 0 && field.getColour() != null)
+        assertThat(game.id()).isEqualTo(existingGame.id());
+        assertThat(game.board().fields())
+                .filteredOn(field -> field.location().column() == 0 && field.colour() != null)
                 .hasSize(1)
                 .first()
                 .hasFieldOrPropertyWithValue("location.column", 0)
@@ -43,29 +43,32 @@ class DropDiscTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturn404ResponseWhenGameDoesNotExist() {
-        assertThatThrownBy(() -> makeDropDiscRequest(randomUUID(), firstPlayer.getColour(), 0))
+        assertThatThrownBy(() -> makeDropDiscRequest(randomUUID(), firstPlayer.colour(), 0))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 404);
     }
 
     @Test
     void shouldReturn500ResponseWhenDiscIsBeingDroppedOutsideTheBoard() {
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.getId(), firstPlayer.getColour(), -1))
+        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), -1))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
 
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.getId(), firstPlayer.getColour(), 7))
+        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 7))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }
 
     @Test
     void shouldReturn500ResponseWhenDiscIsBeingDroppedIntoFullColumn() {
-        for (int i = 0; i < Board.NUMBER_OF_ROWS; i++) {
-            existingGame.dropDisc(Player.Colour.values()[i % 2], 0);
-        }
+        games.computeIfPresent(existingGame.id(), (_, game) -> {
+            for (int i = 0; i < Board.NUMBER_OF_ROWS; i++) {
+                game = game.dropDisc(Player.Colour.values()[i % 2], 0);
+            }
+            return game;
+        });
 
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.getId(), secondPlayer.getColour(), 0))
+        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), secondPlayer.colour(), 0))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }

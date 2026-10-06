@@ -7,15 +7,15 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 public abstract class BaseGameResourceTest {
 
     public static final String BASE_URL = "/game/connect-4";
 
-    protected static final List<Game> games = new ArrayList<>();
+    protected static final ConcurrentHashMap<UUID, Game> games = new ConcurrentHashMap<>();
 
     public static final ResourceExtension resources = ResourceExtension.builder()
             .addResource(new GameResource(games))
