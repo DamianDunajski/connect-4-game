@@ -1,7 +1,7 @@
 package com.kainos.connect4game.domain;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -9,12 +9,12 @@ import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GameMultiThreadingTest {
+class GameMultiThreadingTest {
 
     private final Game game = new Game();
 
     @Test
-    public void concurrentPlayerAdditionsShouldNotExceedPlayersLimit() {
+    void concurrentPlayerAdditionsShouldNotExceedPlayersLimit() {
         int playersCount = 4;
 
         ExecutorService executorService = Executors.newFixedThreadPool(playersCount / 2);
@@ -26,7 +26,7 @@ public class GameMultiThreadingTest {
                 try {
                     game.addPlayer(new Player("John", Player.Colour.values()[playerNumber % 2]));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    // ignore
                 } finally {
                     countDownLatch.countDown();
                 }

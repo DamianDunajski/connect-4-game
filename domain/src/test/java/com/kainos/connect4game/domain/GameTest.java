@@ -1,15 +1,15 @@
 package com.kainos.connect4game.domain;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-
-public class GameTest {
+class GameTest {
 
     @Test
-    public void shouldThrowAnExceptionWhenSecondPlayerHasChosenTheSameColourAsFirstPlayer() throws Exception {
+    void shouldThrowAnExceptionWhenSecondPlayerHasChosenTheSameColourAsFirstPlayer() {
         Game game = new Game();
         game.addPlayer(new Player("John", Player.Colour.Red));
 
@@ -19,7 +19,7 @@ public class GameTest {
     }
 
     @Test
-    public void shouldThrowAnExceptionWhenThirdPlayerIsBeingAdded() throws Exception {
+    void shouldThrowAnExceptionWhenThirdPlayerIsBeingAdded() {
         Game game = new Game();
         game.addPlayer(new Player("John", Player.Colour.Red));
         game.addPlayer(new Player("Carl", Player.Colour.Yellow));
@@ -30,7 +30,7 @@ public class GameTest {
     }
 
     @Test
-    public void shouldThrowAnExceptionWhenTheSamePlayerIsMakingTwoConsecutiveDrops() throws Exception {
+    void shouldThrowAnExceptionWhenTheSamePlayerIsMakingTwoConsecutiveDrops() {
         Player player = new Player("John", Player.Colour.Red);
         Game game = new Game(player);
         game.dropDisc(player.getColour(), 0);
@@ -41,7 +41,7 @@ public class GameTest {
     }
 
     @Test
-    public void shouldThrowAnExceptionWhenOutcomeHasBeenDeterminedButPlayersContinueDroppingDiscs() throws Exception {
+    void shouldThrowAnExceptionWhenOutcomeHasBeenDeterminedButPlayersContinueDroppingDiscs() {
         Player firstPlayer = new Player("John", Player.Colour.Red);
         Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
         Game game = new Game(firstPlayer, secondPlayer);
@@ -59,7 +59,7 @@ public class GameTest {
     }
 
     @Test
-    public void shouldHaveOutcomeWhenFourDiscsHasBeenConnected() {
+    void shouldHaveOutcomeWhenFourDiscsHasBeenConnected() {
         Player firstPlayer = new Player("John", Player.Colour.Red);
         Player secondPlayer = new Player("Carl", Player.Colour.Yellow);
         Game game = new Game(firstPlayer, secondPlayer);

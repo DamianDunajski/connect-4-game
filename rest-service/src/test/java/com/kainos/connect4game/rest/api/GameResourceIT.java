@@ -4,16 +4,15 @@ import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceIT;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 
-import static javax.ws.rs.client.Entity.entity;
-import static javax.ws.rs.client.Entity.json;
-import static javax.ws.rs.client.Entity.text;
+import static jakarta.ws.rs.client.Entity.json;
+import static jakarta.ws.rs.client.Entity.text;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GameResourceIT extends BaseGameResourceIT {
+class GameResourceIT extends BaseGameResourceIT {
 
     private final Client client = new JerseyClientBuilder().build();
 
@@ -21,7 +20,7 @@ public class GameResourceIT extends BaseGameResourceIT {
     private final Player yellowPlayer = new Player("Carl", Player.Colour.Yellow);
 
     @Test
-    public void gameShouldEndWhenPlayerConnectsFourDiscs() {
+    void gameShouldEndWhenPlayerConnectsFourDiscs() {
         // John creates game
         Game game = makeCreateGameRequest(redPlayer);
         assertThat(game.getPlayers()).hasSize(1);

@@ -3,7 +3,7 @@ package com.kainos.connect4game.domain;
 
 import com.kainos.connect4game.domain.Game.Board;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -11,12 +11,12 @@ import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BoardMultiThreadingTest {
+class BoardMultiThreadingTest {
 
     private final Game game = new Game();
 
     @Test
-    public void concurrentDiscDropsShouldBeProperlyReflectedOnTheBoard() {
+    void concurrentDiscDropsShouldBeProperlyReflectedOnTheBoard() {
         int discsCount = Board.NUMBER_OF_COLUMNS * Board.NUMBER_OF_ROWS;
 
         ExecutorService executorService = Executors.newFixedThreadPool(discsCount / 2);
@@ -29,7 +29,7 @@ public class BoardMultiThreadingTest {
                     try {
                         game.getBoard().dropDisc(Player.Colour.Red, column);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        // ignore
                     } finally {
                         countDownLatch.countDown();
                     }

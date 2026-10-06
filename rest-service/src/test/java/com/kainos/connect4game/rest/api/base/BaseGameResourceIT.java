@@ -1,13 +1,14 @@
 package com.kainos.connect4game.rest.api.base;
 
 import com.kainos.connect4game.rest.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.junit.ClassRule;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-public class BaseGameResourceIT {
+@ExtendWith(DropwizardExtensionsSupport.class)
+public abstract class BaseGameResourceIT {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(Application.class);
+    public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(Application.class);
 
 }

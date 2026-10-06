@@ -11,13 +11,16 @@ repositories {
 }
 
 dependencies {
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.assertj:assertj-core:3.5.2")
+    // Enforce Dropwizard BOM across all submodules
+    implementation(platform("io.dropwizard:dropwizard-dependencies:4.0.17"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.assertj:assertj-core:3.27.7")
 }
 
 group = "com.kainos.connect-4-game"
 version = "1.0.0-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications.create<MavenPublication>("maven") {
@@ -25,10 +28,14 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>() {
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<Javadoc>() {
+tasks.withType<Javadoc> {
     options.encoding = "UTF-8"
 }

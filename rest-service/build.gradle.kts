@@ -4,11 +4,9 @@ plugins {
 
 dependencies {
     api(project(":domain"))
-    api(libs.io.dropwizard.dropwizard.core)
-    api(libs.com.smoketurner.dropwizard.swagger)
-    api(libs.javax.xml.bind.jaxb.api)
-    runtimeOnly(libs.org.glassfish.jaxb.jaxb.runtime)
-    testImplementation(libs.io.dropwizard.dropwizard.testing)
+    api("io.dropwizard:dropwizard-core")
+    testImplementation("io.dropwizard:dropwizard-testing")
+    api("com.smoketurner:dropwizard-swagger:4.0.5-1")
 }
 
 tasks.named<Test>("test") {

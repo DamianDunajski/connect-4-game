@@ -2,14 +2,14 @@ package com.kainos.connect4game.domain;
 
 import com.kainos.connect4game.domain.Game.Board;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BoardTest {
+class BoardTest {
 
     @Test
-    public void droppedDiscMustOccupyNextAvailableSpaceInTheColumn() throws Exception {
+    void droppedDiscMustOccupyNextAvailableSpaceInTheColumn() {
         Board board = new Board();
 
         board.dropDisc(Player.Colour.Red, 0);
@@ -24,7 +24,7 @@ public class BoardTest {
     }
 
     @Test
-    public void colourOfTheDiscBeingDroppedCannotBeNull() throws Exception {
+    void colourOfTheDiscBeingDroppedCannotBeNull() {
         Board board = new Board();
 
         Assertions.assertThatThrownBy(() -> board.dropDisc(null, 0))
@@ -33,7 +33,7 @@ public class BoardTest {
     }
 
     @Test
-    public void discCannotBeDroppedOutsideTheBoard() throws Exception {
+    void discCannotBeDroppedOutsideTheBoard() {
         Board board = new Board();
 
         Assertions.assertThatThrownBy(() -> board.dropDisc(Player.Colour.Red, -1))
@@ -46,7 +46,7 @@ public class BoardTest {
     }
 
     @Test
-    public void discCannotBeDroppedIntoFullColumn() throws Exception {
+    void discCannotBeDroppedIntoFullColumn() {
         Board board = new Board();
 
         for (int i = 0; i < Board.NUMBER_OF_ROWS; i++) {

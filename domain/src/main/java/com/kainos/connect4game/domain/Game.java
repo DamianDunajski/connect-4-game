@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.kainos.connect4game.domain.Game.Board.Field.Location;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
 
@@ -16,13 +16,13 @@ public class Game {
 
     private static final OutcomeAnalyser analyser = new OutcomeAnalyser();
 
-    @ApiModelProperty(value = "Unique ID of the game", required = true)
+    @Schema(description = "Unique ID of the game")
     private final UUID id;
-    @ApiModelProperty(value = "Board used in the game", required = true)
+    @Schema(description = "Board used in the game")
     private final Board board;
-    @ApiModelProperty(value = "List of players in the game", required = true)
+    @Schema(description = "List of players in the game")
     private final List<Player> players;
-    @ApiModelProperty(value = "Outcome of the game")
+    @Schema(description = "Outcome of the game")
     private Outcome outcome;
 
     public Game(Player... players) {
@@ -113,9 +113,9 @@ public class Game {
         public static final int NUMBER_OF_COLUMNS = 7;
         public static final int NUMBER_OF_ROWS = 6;
 
-        @ApiModelProperty(value = "List of the fields on the board", required = true)
+        @Schema(description = "List of the fields on the board")
         private final List<Field> fields;
-        @ApiModelProperty(value = "Field populated by last player's move")
+        @Schema(description = "Field populated by last player's move")
         private Field lastPopulatedField;
 
         Board() {
@@ -191,9 +191,9 @@ public class Game {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class Field {
 
-            @ApiModelProperty(value = "Location of the field on the board", required = true)
+            @Schema(description = "Location of the field on the board")
             private Location location;
-            @ApiModelProperty(value = "Colour of the field (null means field not filled)")
+            @Schema(description = "Colour of the field (null means field not filled)")
             private Player.Colour colour;
 
             Field(Location location) {
@@ -238,9 +238,9 @@ public class Game {
 
             public static class Location {
 
-                @ApiModelProperty(value = "Number of column (starting with 0 - top left corner)", required = true)
+                @Schema(description = "Number of column (starting with 0 - top left corner)")
                 private int column;
-                @ApiModelProperty(value = "Number of row (starting with 0 - top left corner)", required = true)
+                @Schema(description = "Number of row (starting with 0 - top left corner)")
                 private int row;
 
                 @JsonCreator
@@ -284,7 +284,7 @@ public class Game {
 
     public static class Outcome {
 
-        @ApiModelProperty(value = "Player who won the game", notes = "Draw is represented as an outcome without winner (winner is null)")
+        @Schema(description = "Player who won the game (draw is represented as an outcome without winner (winner is null))")
         private final Player winner;
 
         @JsonCreator

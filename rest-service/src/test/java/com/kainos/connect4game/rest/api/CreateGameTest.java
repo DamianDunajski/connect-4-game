@@ -4,17 +4,17 @@ import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Game.Board;
 import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static javax.ws.rs.client.Entity.json;
+import static jakarta.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CreateGameTest extends BaseGameResourceTest {
+class CreateGameTest extends BaseGameResourceTest {
 
     private final Player player = new Player("John", Player.Colour.Red);
 
     @Test
-    public void shouldReturnGamesWithUniqueIDs() {
+    void shouldReturnGamesWithUniqueIDs() {
         Game firstGame = makeCreateGameRequest(player);
         Game secondGame = makeCreateGameRequest(player);
 
@@ -24,7 +24,7 @@ public class CreateGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    public void shouldReturnGameWithProperlySizedBlankBoard() {
+    void shouldReturnGameWithProperlySizedBlankBoard() {
         Game game = makeCreateGameRequest(player);
 
         assertThat(game.getBoard().getFields())
@@ -34,14 +34,14 @@ public class CreateGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    public void shouldReturnGameWithFirstPlayerOnThePlayersList() {
+    void shouldReturnGameWithFirstPlayerOnThePlayersList() {
         Game game = makeCreateGameRequest(player);
 
         assertThat(game.getPlayers()).containsOnly(player);
     }
 
     @Test
-    public void shouldAddCreatedGameToTheListOfGamesInProgress() {
+    void shouldAddCreatedGameToTheListOfGamesInProgress() {
         Game game = makeCreateGameRequest(player);
 
         assertThat(games).containsOnly(game);

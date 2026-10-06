@@ -3,20 +3,20 @@ package com.kainos.connect4game.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import javax.validation.constraints.NotNull;
+//import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Player {
 
-    @NotNull(message = "Player name cannot be null")
-    @ApiModelProperty(value = "Name of the player", required = true, example = "John")
+//    @NotNull(message = "Player name cannot be null")
+    @Schema(description = "Name of the player", required = true, example = "John")
     private final String name;
-    @NotNull(message = "Player colour cannot be null")
-    @ApiModelProperty(value = "Colour selected by the player", required = true, example = "Red")
+//    @NotNull(message = "Player colour cannot be null")
+    @Schema(description = "Colour selected by the player", required = true, example = "Red")
     private final Colour colour;
 
     @JsonCreator

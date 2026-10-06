@@ -4,31 +4,31 @@ import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.domain.Player.Colour;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.client.Entity.json;
+import static jakarta.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class JoinGameTest extends BaseGameResourceTest {
+class JoinGameTest extends BaseGameResourceTest {
 
     private final Player firstPlayer = new Player("John", Colour.Red);
     private final Player secondPlayer = new Player("Carl", Colour.Yellow);
 
     private final Game existingGame = new Game(firstPlayer);
 
-    @Before
-    public void initGames() {
+    @BeforeEach
+    void initGames() {
         games.add(existingGame);
     }
 
     @Test
-    public void shouldReturnUpdatedGameWithSecondPlayerOnThePlayersList() {
+    void shouldReturnUpdatedGameWithSecondPlayerOnThePlayersList() {
         Game game = makeJoinGameRequest(existingGame.getId(), secondPlayer);
 
         assertThat(game.getId()).isEqualTo(existingGame.getId());
@@ -36,21 +36,21 @@ public class JoinGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    public void shouldReturn404ResponseWhenGameDoesNotExist() {
+    void shouldReturn404ResponseWhenGameDoesNotExist() {
         assertThatThrownBy(() -> makeJoinGameRequest(randomUUID(), secondPlayer))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 404);
     }
 
     @Test
-    public void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
+    void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
         assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Carl", Colour.Red)))
                 .isInstanceOf(WebApplicationException.class)
                 .hasFieldOrPropertyWithValue("response.status", 500);
     }
 
     @Test
-    public void shouldReturn500ResponseWhenThirdPlayerJoins() {
+    void shouldReturn500ResponseWhenThirdPlayerJoins() {
         existingGame.addPlayer(secondPlayer);
 
         assertThatThrownBy(() -> makeJoinGameRequest(existingGame.getId(), new Player("Stephanie", Colour.Yellow)))
