@@ -1,14 +1,14 @@
 package com.kainos.connect4game.rest;
 
-import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.rest.api.GameResource;
 import io.dropwizard.core.Configuration;
-import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Application extends io.dropwizard.core.Application<Configuration> {
@@ -16,21 +16,19 @@ public class Application extends io.dropwizard.core.Application<Configuration> {
         new Application().run(args);
     }
 
-    @Override
-    public void initialize(Bootstrap<Configuration> bootstrap) {
-        bootstrap.addBundle(new SwaggerBundle<>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(Configuration configuration) {
-                SwaggerBundleConfiguration swaggerConfiguration = new SwaggerBundleConfiguration();
-                swaggerConfiguration.setResourcePackage(getClass().getPackage().getName());
-                return swaggerConfiguration;
-            }
-        });
-    }
-
     public void run(Configuration configuration, Environment environment) {
-        List<Game> games = new CopyOnWriteArrayList<>();
+        environment.jersey().register(new GameResource(new CopyOnWriteArrayList<>()));
 
-        environment.jersey().register(new GameResource(games));
+        try {
+            new JaxrsOpenApiContextBuilder<>()
+                    .openApiConfiguration(new SwaggerConfiguration()
+                            .openAPI(new OpenAPI())
+                            .prettyPrint(true)
+                            .resourcePackages(Set.of(Application.class.getPackage().getName())))
+                    .buildContext(true);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize Swagger context", e);
+        }
+        environment.jersey().register(new OpenApiResource());
     }
 }

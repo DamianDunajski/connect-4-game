@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     api(project(":domain"))
-    api("io.dropwizard:dropwizard-core")
+    implementation("io.dropwizard:dropwizard-core")
     testImplementation("io.dropwizard:dropwizard-testing")
-    api("com.smoketurner:dropwizard-swagger:4.0.5-1")
+    implementation("io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.54")
 }
 
 tasks.named<Test>("test") {

@@ -4,8 +4,8 @@ plugins {
 
 dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations")
-    api("com.google.guava:guava")
-    api("io.swagger.core.v3:swagger-annotations-jakarta:2.2.20")
+    api("io.swagger.core.v3:swagger-annotations-jakarta:2.2.54")
+    implementation("com.google.guava:guava")
 }
 
 description = "domain"
