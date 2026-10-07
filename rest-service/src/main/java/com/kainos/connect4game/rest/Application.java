@@ -2,6 +2,7 @@ package com.kainos.connect4game.rest;
 
 import com.kainos.connect4game.rest.api.GameResource;
 import io.dropwizard.core.Configuration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.core.setup.Environment;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
@@ -17,6 +18,10 @@ public class Application extends io.dropwizard.core.Application<Configuration> {
     }
 
     public void run(Configuration configuration, Environment environment) {
+        if (configuration.getServerFactory() instanceof DefaultServerFactory serverFactory) {
+            serverFactory.setEnableVirtualThreads(true);
+        }
+
         environment.jersey().register(new GameResource(new ConcurrentHashMap<>()));
 
         try {
