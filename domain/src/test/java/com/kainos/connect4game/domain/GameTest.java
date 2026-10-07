@@ -31,7 +31,7 @@ class GameTest {
     @Test
     void shouldThrowAnExceptionWhenTheSamePlayerIsMakingTwoConsecutiveDrops() {
         Player player = new Player("John", Player.Colour.Red);
-        Game game = new Game(player).dropDisc(player.colour(), 0);
+        Game game = new Game(player, new Player("Carl", Player.Colour.Yellow)).dropDisc(player.colour(), 0);
 
         assertThatThrownBy(() -> game.dropDisc(player.colour(), 0))
                 .isExactlyInstanceOf(IllegalStateException.class)

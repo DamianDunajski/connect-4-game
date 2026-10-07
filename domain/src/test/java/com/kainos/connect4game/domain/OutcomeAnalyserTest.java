@@ -19,7 +19,7 @@ class OutcomeAnalyserTest {
     private static final OutcomeAnalyser analyser = new OutcomeAnalyser();
 
     public static Collection<Arguments> scenarios() {
-        return Arrays.asList(
+        return List.of(
                 arguments(List.of(), Optional.empty()),
                 // discs connected in a row
                 arguments(
@@ -82,14 +82,7 @@ class OutcomeAnalyserTest {
                 .isEqualTo(outcome);
     }
 
-    static class Drop {
-        private final Player.Colour colour;
-        private final int column;
-
-        private Drop(Player.Colour colour, int column) {
-            this.colour = colour;
-            this.column = column;
-        }
+    record Drop(Player.Colour colour, int column) {
 
         static Drop redIntoColumn(int column) {
             return new Drop(Player.Colour.Red, column);
@@ -101,7 +94,7 @@ class OutcomeAnalyserTest {
 
         @Override
         public String toString() {
-            return String.format("%s disc into column %d", colour, column).toLowerCase();
+            return "%s disc into column %d".formatted(colour, column).toLowerCase();
         }
     }
 

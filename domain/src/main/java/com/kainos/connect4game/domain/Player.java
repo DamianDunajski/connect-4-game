@@ -10,12 +10,9 @@ public record Player(
         @Schema(description = "Colour selected by the player", example = "Red")
         Colour colour
 ) {
-
-    public Player(String name, Colour colour) {
+    public Player {
         requireNonNull(name, "Player name cannot be null");
         requireNonNull(colour, "Player colour cannot be null");
-        this.name = name;
-        this.colour = colour;
     }
 
     public enum Colour {

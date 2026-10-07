@@ -29,7 +29,7 @@ class DropDiscTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnUpdatedGameWithDroppedDiscReflectedOnTheBoard() {
-        Game game = makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 0);
+        var game = makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 0);
 
         assertThat(game.id()).isEqualTo(existingGame.id());
         assertThat(game.board().fields())

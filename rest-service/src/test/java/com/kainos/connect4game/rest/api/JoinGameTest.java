@@ -29,7 +29,7 @@ class JoinGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnUpdatedGameWithSecondPlayerOnThePlayersList() {
-        Game game = makeJoinGameRequest(existingGame.id(), secondPlayer);
+        var game = makeJoinGameRequest(existingGame.id(), secondPlayer);
 
         assertThat(game.id()).isEqualTo(existingGame.id());
         assertThat(game.players()).containsOnly(firstPlayer, secondPlayer);

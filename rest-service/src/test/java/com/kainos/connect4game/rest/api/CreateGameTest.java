@@ -15,8 +15,8 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGamesWithUniqueIDs() {
-        Game firstGame = makeCreateGameRequest(player);
-        Game secondGame = makeCreateGameRequest(player);
+        var firstGame = makeCreateGameRequest(player);
+        var secondGame = makeCreateGameRequest(player);
 
         assertThat(firstGame.id())
                 .isNotEqualByComparingTo(secondGame.id())
@@ -25,7 +25,7 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGameWithProperlySizedBlankBoard() {
-        Game game = makeCreateGameRequest(player);
+        var game = makeCreateGameRequest(player);
 
         assertThat(game.board().fields())
                 .hasSize(Board.NUMBER_OF_COLUMNS * Board.NUMBER_OF_ROWS)
@@ -35,14 +35,14 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGameWithFirstPlayerOnThePlayersList() {
-        Game game = makeCreateGameRequest(player);
+        var game = makeCreateGameRequest(player);
 
         assertThat(game.players()).containsOnly(player);
     }
 
     @Test
     void shouldAddCreatedGameToTheListOfGamesInProgress() {
-        Game game = makeCreateGameRequest(player);
+        var game = makeCreateGameRequest(player);
 
         assertThat(games).containsValues(game);
     }

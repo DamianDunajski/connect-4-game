@@ -5,7 +5,6 @@ import com.kainos.connect4game.domain.Game.Board.Field.Location;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -18,92 +17,92 @@ public record Game(
         Board board,
         @Schema(description = "List of players in the game")
         List<Player> players,
-        @Schema(description = "Outcome of the game")
+        @Schema(description = "Outcome of the game", nullable = true)
         Outcome outcome
 ) {
 
     private static final OutcomeAnalyser analyser = new OutcomeAnalyser();
 
-    public Game(Player... players) {
-        this(randomUUID(), new Board(), List.of(players), null);
+    public Game {
+        checkPlayers(players);
+        requireNonNull(id);
+        requireNonNull(board);
+        players = List.copyOf(players);
     }
 
-    public Game(UUID id, Board board, List<Player> players, Outcome outcome) {
-        checkPlayers(players);
-        this.id = id;
-        this.board = board;
-        this.players = players;
-        this.outcome = outcome;
+    public Game(Player... players) {
+        this(randomUUID(), new Board(), List.of(players), null);
     }
 
     private void checkPlayers(List<Player> players) {
         if (players.size() > 2) {
             throw new IllegalStateException("Game cannot have more than 2 players");
         }
-        Map<Player.Colour, List<Player>> playersByColour = players.stream().collect(Collectors.groupingBy(Player::colour));
-        if (playersByColour.values().stream().anyMatch(groupedPlayers -> groupedPlayers.size() > 1)) {
+        long uniqueColours = players.stream().map(Player::colour).distinct().count();
+        if (uniqueColours != players.size()) {
             throw new IllegalStateException("Two players cannot choose the same colour");
         }
     }
 
     public Game addPlayer(Player player) {
-        return new Game(
-                id,
-                board,
-                Stream.concat(this.players.stream(), Stream.of(player)).toList(),
-                outcome
-        );
+        return new Game(id, board, Stream.concat(players.stream(), Stream.of(player)).toList(), outcome);
     }
 
     public Game dropDisc(Player.Colour colour, int column) {
         if (outcome != null) {
             throw new IllegalStateException("Game has already ended");
         }
-        if (board.lastPopulatedField != null && board.lastPopulatedField.colour == colour) {
+        if (players.size() < 2) {
+            throw new IllegalStateException("Game requires 2 players to start");
+        }
+        if (players.stream().noneMatch(p -> p.colour() == colour)) {
+            throw new IllegalArgumentException("Player with colour " + colour + " is not in this game");
+        }
+        if (board.lastPopulatedField() instanceof Board.Field(_, var lastColour) && lastColour == colour) {
             throw new IllegalStateException("Single player cannot drop two discs in a row");
         }
 
         Board updatedBoard = board.dropDisc(colour, column);
 
-        return analyser.determineOutcome(updatedBoard)
-                .map(winningColour -> {
-                    Player winner = players.stream()
-                            .filter(player -> player.colour() == winningColour)
-                            .findFirst()
-                            .orElseThrow();
-                    return new Game(
-                            id,
-                            updatedBoard,
-                            players,
-                            new Outcome(winner)
-                    );
-                }).orElseGet(() -> new Game(
-                        id,
-                        updatedBoard,
-                        players,
-                        null
-                ));
+        Outcome outcome = analyser.determineOutcome(updatedBoard)
+                .flatMap(winningColour ->
+                        players.stream()
+                                .filter(player -> player.colour() == winningColour)
+                                .findFirst()
+                )
+                .map(Outcome::new)
+                .orElse(null);
+
+        return new Game(id, updatedBoard, players, outcome);
 
     }
 
     public record Board(
             @Schema(description = "List of the fields on the board")
             List<Field> fields,
-            @Schema(description = "Field populated by last player's move")
+            @Schema(description = "Field populated by last player's move", nullable = true)
             Field lastPopulatedField
     ) {
 
         public static final int NUMBER_OF_COLUMNS = 7;
         public static final int NUMBER_OF_ROWS = 6;
 
+        public Board {
+            fields = List.copyOf(requireNonNull(fields));
+        }
+
         Board() {
+            this(initialFields(), null);
+        }
+
+        private static List<Field> initialFields() {
             List<Field> fields = new ArrayList<>(NUMBER_OF_COLUMNS * NUMBER_OF_ROWS);
-            for (int column = 0; column < NUMBER_OF_COLUMNS; column++) {
-                for (int row = 0; row < NUMBER_OF_ROWS; row++) {
-                    fields.add(new Field(new Location(column, row)));
+            for (int row = 0; row < NUMBER_OF_ROWS; row++) {
+                for (int col = 0; col < NUMBER_OF_COLUMNS; col++) {
+                    fields.add(new Field(new Location(col, row)));
                 }
             }
-            this(List.copyOf(fields), null);
+            return fields;
         }
 
         Board dropDisc(Player.Colour colour, int column) {
@@ -113,20 +112,19 @@ public record Game(
             }
 
             OptionalInt lastOccupiedRow = findLastOccupiedRow(column);
-            lastOccupiedRow.ifPresent((row) -> {
-                if (row == 0) {
-                    throw new IllegalStateException("Column " + column + " is already full");
-                }
-            });
+            if (lastOccupiedRow.isPresent() && lastOccupiedRow.getAsInt() == 0) {
+                throw new IllegalStateException("Column " + column + " is already full");
+            }
 
-            Location discLocation = findNextAvailableField(column, lastOccupiedRow).location;
+            Location discLocation = findNextAvailableField(column, lastOccupiedRow.orElse(Board.NUMBER_OF_ROWS)).location;
 
             return new Board(
-                    fields.stream().map(field ->
-                            field.location().equals(discLocation)
+                    fields.stream()
+                            .map(field -> field.location().equals(discLocation)
                                     ? new Field(field.location(), colour)
                                     : field
-                    ).toList(),
+                            )
+                            .toList(),
                     new Field(
                             discLocation,
                             colour
@@ -141,20 +139,25 @@ public record Game(
                     .min();
         }
 
-        private Field findNextAvailableField(int column, OptionalInt lastOccupiedRow) {
+        private Field findNextAvailableField(int column, int lastOccupiedRow) {
             return fields.stream()
-                    .filter(field -> field.location.column == column && field.location.row == lastOccupiedRow.orElse(Board.NUMBER_OF_ROWS) - 1)
+                    .filter(field -> field.location.column == column && field.location.row == lastOccupiedRow - 1)
                     .findFirst()
-                    .get();
+                    .orElseThrow();
         }
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public record Field(
                 @Schema(description = "Location of the field on the board")
                 Location location,
-                @Schema(description = "Colour of the field (null means field not filled)")
+                @Schema(description = "Colour of the field (null means field not filled)", nullable = true)
                 Player.Colour colour
         ) {
+
+            public Field {
+                requireNonNull(location);
+            }
+
             Field(Location location) {
                 this(location, null);
             }
@@ -173,5 +176,9 @@ public record Game(
             @Schema(description = "Player who won the game (draw is represented as an outcome without winner (winner is null))")
             Player winner
     ) {
+
+        public Outcome {
+            requireNonNull(winner);
+        }
     }
 }

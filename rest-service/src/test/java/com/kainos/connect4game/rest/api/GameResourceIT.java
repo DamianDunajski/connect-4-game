@@ -22,7 +22,7 @@ class GameResourceIT extends BaseGameResourceIT {
     @Test
     void gameShouldEndWhenPlayerConnectsFourDiscs() {
         // John creates game
-        Game game = makeCreateGameRequest(redPlayer);
+        var game = makeCreateGameRequest(redPlayer);
         assertThat(game.players()).hasSize(1);
 
         // Carl joins the game
@@ -69,15 +69,15 @@ class GameResourceIT extends BaseGameResourceIT {
     }
 
     private Game makeCreateGameRequest(Player player) {
-        return client.target(String.format("http://localhost:%d/game/connect-4", RULE.getLocalPort())).request().post(json(player), Game.class);
+        return client.target("http://localhost:%d/game/connect-4".formatted(RULE.getLocalPort())).request().post(json(player), Game.class);
     }
 
     private Game makeJoinGameRequest(Game game, Player player) {
-        return client.target(String.format("http://localhost:%d/game/connect-4/%s/join", RULE.getLocalPort(), game.id())).request().put(json(player), Game.class);
+        return client.target("http://localhost:%d/game/connect-4/%s/join".formatted(RULE.getLocalPort(), game.id())).request().put(json(player), Game.class);
     }
 
     private Game makeDropDiscRequest(Game game, Player.Colour colour, int column) {
-        return client.target(String.format("http://localhost:%d/game/connect-4/%s/drop/%s/column/%s", RULE.getLocalPort(), game.id(), colour, column)).request().put(text(""), Game.class);
+        return client.target("http://localhost:%d/game/connect-4/%s/drop/%s/column/%s".formatted(RULE.getLocalPort(), game.id(), colour, column)).request().put(text(""), Game.class);
     }
 
 }
