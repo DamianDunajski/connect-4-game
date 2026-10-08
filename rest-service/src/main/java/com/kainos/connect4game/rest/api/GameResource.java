@@ -2,6 +2,7 @@ package com.kainos.connect4game.rest.api;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
+import com.kainos.connect4game.rest.repository.GameRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,21 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/game/connect-4")
 @Tag(name = "Connect 4", description = "Game API")
 public class GameResource {
 
-    private final ConcurrentHashMap<UUID, Game> gamesInProgress;
+    private final GameRepository repository;
 
-    public GameResource() {
-        this.gamesInProgress = new ConcurrentHashMap<>();
-    }
-
-    public GameResource(ConcurrentHashMap<UUID, Game> gamesInProgress) {
-        this.gamesInProgress = gamesInProgress;
+    public GameResource(GameRepository repository) {
+        this.repository = repository;
     }
 
     @PostMapping
@@ -40,7 +36,7 @@ public class GameResource {
     })
     public Game createGame(@Parameter(name = "player", description = "Player who starts new game", required = true) @NotNull @Valid @RequestBody Player player) {
         Game game = new Game(player);
-        this.gamesInProgress.put(game.id(), game);
+        repository.saveGame(game);
         return game;
     }
 
@@ -53,11 +49,8 @@ public class GameResource {
     })
     public Game joinGame(@Parameter(name = "id", description = "ID of the game to join", required = true) @PathVariable("id") UUID id,
                          @Parameter(name = "player", description = "Player who joins existing game", required = true) @NotNull @Valid @RequestBody Player player) {
-        Game mutatedGame = this.gamesInProgress.computeIfPresent(id, (_, game) -> game.addPlayer(player));
-        if (mutatedGame == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return mutatedGame;
+        Game game = repository.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return repository.saveGame(game.addPlayer(player));
     }
 
     @PutMapping(path = "{id}/drop/{colour}/column/{column}")
@@ -70,11 +63,8 @@ public class GameResource {
     public Game dropDisc(@Parameter(name = "id", description = "ID of the game", required = true) @PathVariable("id") UUID id,
                          @Parameter(name = "colour", description = "Colour of the disc being dropped", required = true) @PathVariable("colour") Player.Colour colour,
                          @Parameter(name = "column", description = "Column the disc being dropped into", required = true) @PathVariable("column") int column) {
-        Game mutatedGame = gamesInProgress.computeIfPresent(id, (_, game) -> game.dropDisc(colour, column));
-        if (mutatedGame == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return mutatedGame;
+        Game game = repository.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return repository.saveGame(game.dropDisc(colour, column));
     }
 
 }
