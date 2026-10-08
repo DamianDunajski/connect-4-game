@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     api(project(":domain"))
-    implementation("io.dropwizard:dropwizard-core")
-    testImplementation("io.dropwizard:dropwizard-testing")
-    implementation("io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.54")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 }
 
 tasks.named<Test>("test") {

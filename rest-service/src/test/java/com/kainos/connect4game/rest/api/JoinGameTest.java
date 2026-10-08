@@ -7,13 +7,13 @@ import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.ws.rs.WebApplicationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.client.assertj.RestTestClientResponse;
+
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static jakarta.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JoinGameTest extends BaseGameResourceTest {
 
@@ -29,37 +29,40 @@ class JoinGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnUpdatedGameWithSecondPlayerOnThePlayersList() {
-        var game = makeJoinGameRequest(existingGame.id(), secondPlayer);
-
-        assertThat(game.id()).isEqualTo(existingGame.id());
-        assertThat(game.players()).containsOnly(firstPlayer, secondPlayer);
+        assertThat(makeJoinGameRequest(existingGame.id(), secondPlayer))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).satisfies(game -> {
+                    assertThat(game.id()).isEqualTo(existingGame.id());
+                    assertThat(game.players()).containsOnly(firstPlayer, secondPlayer);
+                });
     }
 
     @Test
     void shouldReturn404ResponseWhenGameDoesNotExist() {
-        assertThatThrownBy(() -> makeJoinGameRequest(randomUUID(), secondPlayer))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 404);
+        assertThat(makeJoinGameRequest(randomUUID(), secondPlayer))
+                .hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.id(), new Player("Carl", Colour.Red)))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 500);
+        assertThat(makeJoinGameRequest(existingGame.id(), new Player("Carl", Colour.Red)))
+                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
     void shouldReturn500ResponseWhenThirdPlayerJoins() {
         games.computeIfPresent(existingGame.id(), (_, game) -> game.addPlayer(secondPlayer));
 
-        assertThatThrownBy(() -> makeJoinGameRequest(existingGame.id(), new Player("Stephanie", Colour.Yellow)))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 500);
+        assertThat(makeJoinGameRequest(existingGame.id(), new Player("Stephanie", Colour.Yellow)))
+                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private Game makeJoinGameRequest(UUID id, Player player) {
-        return resources.client().target(BASE_URL + "/" + id + "/join").request()
-                .put(json(player), Game.class);
+    private RestTestClientResponse makeJoinGameRequest(UUID id, Player player) {
+        return RestTestClientResponse.from(
+                client.put()
+                        .uri("%s/%s/join".formatted(BASE_URL, id))
+                        .body(player)
+                        .exchange()
+        );
     }
 }

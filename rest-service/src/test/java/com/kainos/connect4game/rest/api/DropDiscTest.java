@@ -6,14 +6,13 @@ import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.client.assertj.RestTestClientResponse;
 
-import jakarta.ws.rs.WebApplicationException;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static jakarta.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DropDiscTest extends BaseGameResourceTest {
 
@@ -29,7 +28,9 @@ class DropDiscTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnUpdatedGameWithDroppedDiscReflectedOnTheBoard() {
-        var game = makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 0);
+        var game = assertThat(makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 0))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
 
         assertThat(game.id()).isEqualTo(existingGame.id());
         assertThat(game.board().fields())
@@ -43,20 +44,17 @@ class DropDiscTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturn404ResponseWhenGameDoesNotExist() {
-        assertThatThrownBy(() -> makeDropDiscRequest(randomUUID(), firstPlayer.colour(), 0))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 404);
+        assertThat(makeDropDiscRequest(randomUUID(), firstPlayer.colour(), 0))
+                .hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void shouldReturn500ResponseWhenDiscIsBeingDroppedOutsideTheBoard() {
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), -1))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 500);
+        assertThat(makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), -1))
+                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 7))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 500);
+        assertThat(makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 7))
+                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
@@ -68,13 +66,15 @@ class DropDiscTest extends BaseGameResourceTest {
             return game;
         });
 
-        assertThatThrownBy(() -> makeDropDiscRequest(existingGame.id(), secondPlayer.colour(), 0))
-                .isInstanceOf(WebApplicationException.class)
-                .hasFieldOrPropertyWithValue("response.status", 500);
+        assertThat(makeDropDiscRequest(existingGame.id(), secondPlayer.colour(), 0))
+                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private Game makeDropDiscRequest(UUID id, Player.Colour colour, int column) {
-        return resources.client().target(BASE_URL + "/" + id + "/drop/" + colour + "/column/" + column).request()
-                .put(json(""), Game.class);
+    private RestTestClientResponse makeDropDiscRequest(UUID id, Player.Colour colour, int column) {
+        return RestTestClientResponse.from(
+                client.put()
+                        .uri("%s/%s/drop/%s/column/%d".formatted(BASE_URL, id, colour, column))
+                        .exchange()
+        );
     }
 }

@@ -11,8 +11,7 @@ repositories {
 }
 
 dependencies {
-    // Enforce Dropwizard BOM across all submodules
-    implementation(platform("io.dropwizard:dropwizard-dependencies:5.0.2"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.27.7")

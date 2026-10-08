@@ -5,8 +5,9 @@ import com.kainos.connect4game.domain.Game.Board;
 import com.kainos.connect4game.domain.Player;
 import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.client.assertj.RestTestClientResponse;
 
-import static jakarta.ws.rs.client.Entity.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateGameTest extends BaseGameResourceTest {
@@ -15,8 +16,12 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGamesWithUniqueIDs() {
-        var firstGame = makeCreateGameRequest(player);
-        var secondGame = makeCreateGameRequest(player);
+        var firstGame = assertThat(makeCreateGameRequest(player))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
+        var secondGame = assertThat(makeCreateGameRequest(player))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
 
         assertThat(firstGame.id())
                 .isNotEqualByComparingTo(secondGame.id())
@@ -25,7 +30,9 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGameWithProperlySizedBlankBoard() {
-        var game = makeCreateGameRequest(player);
+        var game = assertThat(makeCreateGameRequest(player))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
 
         assertThat(game.board().fields())
                 .hasSize(Board.NUMBER_OF_COLUMNS * Board.NUMBER_OF_ROWS)
@@ -35,20 +42,28 @@ class CreateGameTest extends BaseGameResourceTest {
 
     @Test
     void shouldReturnGameWithFirstPlayerOnThePlayersList() {
-        var game = makeCreateGameRequest(player);
+        var game = assertThat(makeCreateGameRequest(player))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
 
         assertThat(game.players()).containsOnly(player);
     }
 
     @Test
     void shouldAddCreatedGameToTheListOfGamesInProgress() {
-        var game = makeCreateGameRequest(player);
+        var game = assertThat(makeCreateGameRequest(player))
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Game.class).actual();
 
         assertThat(games).containsValues(game);
     }
 
-    private Game makeCreateGameRequest(Player player) {
-        return resources.client().target(BASE_URL).request()
-                .post(json(player), Game.class);
+    private RestTestClientResponse makeCreateGameRequest(Player player) {
+        return RestTestClientResponse.from(
+                client.post()
+                        .uri(BASE_URL)
+                        .body(player)
+                        .exchange()
+        );
     }
 }

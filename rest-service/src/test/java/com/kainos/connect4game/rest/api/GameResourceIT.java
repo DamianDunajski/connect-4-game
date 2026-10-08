@@ -2,22 +2,31 @@ package com.kainos.connect4game.rest.api;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
-import com.kainos.connect4game.rest.api.base.BaseGameResourceIT;
-import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.ws.rs.client.Client;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
-import static jakarta.ws.rs.client.Entity.json;
-import static jakarta.ws.rs.client.Entity.text;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GameResourceIT extends BaseGameResourceIT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class GameResourceIT  {
 
-    private final Client client = new JerseyClientBuilder().build();
+    @LocalServerPort
+    private int port;
+    private RestTestClient client;
 
     private final Player redPlayer = new Player("John", Player.Colour.Red);
     private final Player yellowPlayer = new Player("Carl", Player.Colour.Yellow);
+
+    @BeforeEach
+    void setup() {
+        if (client == null) {
+            client = RestTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        }
+    }
 
     @Test
     void gameShouldEndWhenPlayerConnectsFourDiscs() {
@@ -69,15 +78,21 @@ class GameResourceIT extends BaseGameResourceIT {
     }
 
     private Game makeCreateGameRequest(Player player) {
-        return client.target("http://localhost:%d/game/connect-4".formatted(RULE.getLocalPort())).request().post(json(player), Game.class);
+        return client.post().uri("/game/connect-4").body(player).exchange()
+                .expectStatus().isOk()
+                .expectBody(Game.class).returnResult().getResponseBody();
     }
 
     private Game makeJoinGameRequest(Game game, Player player) {
-        return client.target("http://localhost:%d/game/connect-4/%s/join".formatted(RULE.getLocalPort(), game.id())).request().put(json(player), Game.class);
+        return client.put().uri("/game/connect-4/%s/join".formatted(game.id())).body(player).exchange()
+                .expectStatus().isOk()
+                .expectBody(Game.class).returnResult().getResponseBody();
     }
 
     private Game makeDropDiscRequest(Game game, Player.Colour colour, int column) {
-        return client.target("http://localhost:%d/game/connect-4/%s/drop/%s/column/%s".formatted(RULE.getLocalPort(), game.id(), colour, column)).request().put(text(""), Game.class);
+        return client.put().uri("/game/connect-4/%s/drop/%s/column/%s".formatted(game.id(), colour, column)).exchange()
+                .expectStatus().isOk()
+                .expectBody(Game.class).returnResult().getResponseBody();
     }
 
 }
