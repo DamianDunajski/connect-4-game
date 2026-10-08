@@ -230,6 +230,7 @@ Swagger UI: `http://localhost:8080/swagger` (OpenAPI JSON: `/v3/api-docs`)
 ### Prerequisites
 
 - **Java 25** (with preview features enabled for Stream Gatherers)
+- **GraalVM JDK 25** (optional, required for Ahead-Of-Time (AOT) native image compilation) with C build tools (`clang`/`gcc`)
 - **Gradle** (or use the included `./gradlew` wrapper)
 
 ### Build and Test
@@ -246,7 +247,7 @@ Run tests only:
 ./gradlew test
 ```
 
-### Run the Application
+### Run the Application (JVM)
 
 Start the Spring Boot REST service:
 
@@ -260,9 +261,40 @@ Or run the compiled JAR:
 java -jar rest-service/build/libs/rest-service-1.0.0-SNAPSHOT.jar
 ```
 
-Once running, access Swagger UI at:
+### GraalVM Native Image (AOT Compilation)
+
+The project is configured with GraalVM Native Build Tools to compile into a standalone, instant-startup native executable.
+
+#### 1. Compile Native Binary
+
+Build the native executable ahead-of-time:
+
+```bash
+./gradlew :rest-service:nativeCompile
 ```
-http://localhost:8080/swagger
+
+#### 2. Run Native Executable
+
+Execute the generated binary directly without requiring a JVM:
+
+```bash
+./rest-service/build/native/nativeCompile/connect-4-game
+```
+
+#### 3. Run Native Tests
+
+Execute integration and unit tests compiled directly into a native binary:
+
+```bash
+./gradlew :rest-service:nativeTest
+```
+
+#### 4. Build Native Container Image (via Buildpacks)
+
+Package the native binary into a container image using Cloud Native Buildpacks (requires Docker):
+
+```bash
+./gradlew :rest-service:bootBuildImage
 ```
 
 ---
