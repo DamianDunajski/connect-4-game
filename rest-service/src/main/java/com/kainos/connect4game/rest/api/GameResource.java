@@ -32,6 +32,7 @@ public class GameResource {
     @Operation(summary = "Create new game")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Game has been created"),
+            @ApiResponse(responseCode = "400", description = "Invalid player data"),
             @ApiResponse(responseCode = "500", description = "Error occurred - game has not been created")
     })
     public Game createGame(@Parameter(name = "player", description = "Player who starts new game", required = true) @NotNull @Valid @RequestBody Player player) {
@@ -44,7 +45,9 @@ public class GameResource {
     @Operation(summary = "Join existing game")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Game has been joined"),
+            @ApiResponse(responseCode = "400", description = "Invalid player data"),
             @ApiResponse(responseCode = "404", description = "Game does not exist or has been already completed"),
+            @ApiResponse(responseCode = "409", description = "Illegal game state action"),
             @ApiResponse(responseCode = "500", description = "Error occurred - game has not been joined")
     })
     public Game joinGame(@Parameter(name = "id", description = "ID of the game to join", required = true) @PathVariable("id") UUID id,
@@ -57,7 +60,9 @@ public class GameResource {
     @Operation(summary = "Drop colour disc into column")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Disc has been dropped"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameter or move"),
             @ApiResponse(responseCode = "404", description = "Game does not exist or has been already completed"),
+            @ApiResponse(responseCode = "409", description = "Illegal game state action"),
             @ApiResponse(responseCode = "500", description = "Error occurred - disc has not been dropped")
     })
     public Game dropDisc(@Parameter(name = "id", description = "ID of the game", required = true) @PathVariable("id") UUID id,
