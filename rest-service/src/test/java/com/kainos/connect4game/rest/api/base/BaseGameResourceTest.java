@@ -2,6 +2,7 @@ package com.kainos.connect4game.rest.api.base;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.rest.api.GameResource;
+import com.kainos.connect4game.rest.api.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -19,7 +20,11 @@ public abstract class BaseGameResourceTest {
     public void init() {
         games.clear();
         if (this.client == null) {
-            this.client = RestTestClient.bindToController(new GameResource(games)).build();
+            this.client = RestTestClient.bindToController(new GameResource(games))
+                    .configureServer(server -> {
+                        server.setControllerAdvice(new GlobalExceptionHandler());
+                    })
+                    .build();
         }
     }
 

@@ -49,16 +49,16 @@ class DropDiscTest extends BaseGameResourceTest {
     }
 
     @Test
-    void shouldReturn500ResponseWhenDiscIsBeingDroppedOutsideTheBoard() {
+    void shouldReturn400ResponseWhenDiscIsBeingDroppedOutsideTheBoard() {
         assertThat(makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), -1))
-                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                .hasStatus(HttpStatus.BAD_REQUEST);
 
         assertThat(makeDropDiscRequest(existingGame.id(), firstPlayer.colour(), 7))
-                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                .hasStatus(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    void shouldReturn500ResponseWhenDiscIsBeingDroppedIntoFullColumn() {
+    void shouldReturn409ResponseWhenDiscIsBeingDroppedIntoFullColumn() {
         games.computeIfPresent(existingGame.id(), (_, game) -> {
             for (int i = 0; i < Board.NUMBER_OF_ROWS; i++) {
                 game = game.dropDisc(Player.Colour.values()[i % 2], 0);
@@ -67,7 +67,7 @@ class DropDiscTest extends BaseGameResourceTest {
         });
 
         assertThat(makeDropDiscRequest(existingGame.id(), secondPlayer.colour(), 0))
-                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                .hasStatus(HttpStatus.CONFLICT);
     }
 
     private RestTestClientResponse makeDropDiscRequest(UUID id, Player.Colour colour, int column) {

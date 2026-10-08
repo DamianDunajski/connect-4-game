@@ -44,17 +44,17 @@ class JoinGameTest extends BaseGameResourceTest {
     }
 
     @Test
-    void shouldReturn500ResponseWhenSecondPlayerChoosesTheSameColour() {
+    void shouldReturn409ResponseWhenSecondPlayerChoosesTheSameColour() {
         assertThat(makeJoinGameRequest(existingGame.id(), new Player("Carl", Colour.Red)))
-                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                .hasStatus(HttpStatus.CONFLICT);
     }
 
     @Test
-    void shouldReturn500ResponseWhenThirdPlayerJoins() {
+    void shouldReturn409ResponseWhenThirdPlayerJoins() {
         games.computeIfPresent(existingGame.id(), (_, game) -> game.addPlayer(secondPlayer));
 
         assertThat(makeJoinGameRequest(existingGame.id(), new Player("Stephanie", Colour.Yellow)))
-                .hasStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                .hasStatus(HttpStatus.CONFLICT);
     }
 
     private RestTestClientResponse makeJoinGameRequest(UUID id, Player player) {
