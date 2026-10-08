@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-gradle-plugin:4.1.1")
+    implementation(libs.spring.boot.gradle.plugin)
 }

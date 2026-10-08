@@ -10,11 +10,13 @@ repositories {
     }
 }
 
+val libs = the<VersionCatalogsExtension>().named("libs")
+
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.27.7")
+    implementation(platform(libs.findLibrary("spring-boot-dependencies").get()))
+    testImplementation(libs.findLibrary("junit-jupiter").get())
+    testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
+    testImplementation(libs.findLibrary("assertj-core").get())
 }
 
 group = "com.kainos.connect-4-game"

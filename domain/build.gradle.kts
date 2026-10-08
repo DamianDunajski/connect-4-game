@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-annotations")
-    api("io.swagger.core.v3:swagger-annotations-jakarta:2.2.54")
+    api(libs.jackson.annotations)
+    api(libs.swagger.annotations)
 }
 
 description = "domain"
