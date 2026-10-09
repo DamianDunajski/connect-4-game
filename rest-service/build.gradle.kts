@@ -8,6 +8,7 @@ dependencies {
     api(project(":domain"))
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.micrometer.registry.prometheus)
     testImplementation(libs.spring.boot.starter.test)
     implementation(libs.springdoc.openapi)
 }

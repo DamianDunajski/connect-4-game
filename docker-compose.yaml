@@ -1,0 +1,53 @@
+services:
+  game-api:
+    image: rest-service:1.0.0-SNAPSHOT
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - "8080:8080"
+    labels:
+      logging: "alloy"
+      app: "connect-4-game"
+  alloy:
+    image: grafana/alloy:v1.20.1
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./docker/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+    depends_on:
+      - game-api
+      - loki
+      - mimir
+  loki:
+    image: grafana/loki:3.7.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  mimir:
+    image: grafana/mimir:3.2.2
+    ports:
+      - "9009:9009"
+    command: [ "-config.file=/etc/mimir/mimir.yaml" ]
+    volumes:
+      - ./docker/mimir/mimir.yaml:/etc/mimir/mimir.yaml:ro
+      - mimir_data:/data/mimir
+  grafana:
+    image: grafana/grafana:13.2
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - loki
+      - mimir
+
+volumes:
+  mimir_data:

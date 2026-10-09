@@ -1,0 +1,77 @@
+// LOGS-1. Discover Docker containers
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+
+  filter {
+    name   = "label"
+    values = ["logging=alloy"]
+  }
+}
+
+// LOGS-2. Relabel Docker metadata into Loki labels
+discovery.relabel "docker_logs" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_app"]
+    target_label  = "app"
+  }
+}
+
+// LOGS-3. Collect container logs from the Docker daemon
+loki.source.docker "connect4_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_logs.output
+  forward_to = [loki.process.spring_boot_parser.receiver]
+}
+
+// LOGS-4. Process structured Logstash JSON emitted by Spring Boot
+loki.process "spring_boot_parser" {
+  stage.json {
+    expressions = {
+      level       = "level",
+      logger_name = "logger_name",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+// LOGS-5. Send batches to Loki endpoint
+loki.write "local_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// METRICS-1. Fetch metrics from Spring Boot Actuator endpoint
+prometheus.scrape "game_api" {
+  targets = [{
+    __address__ = "game-api:8080",
+  }]
+  metrics_path = "/actuator/prometheus"
+  forward_to = [prometheus.remote_write.mimir.receiver]
+}
+
+// METRICS-2. Send batches to Mimir endpoint
+prometheus.remote_write "mimir" {
+  endpoint {
+    url = "http://mimir:9009/api/v1/push"
+    headers = {
+      "X-Scope-OrgID" = "anonymous",
+    }
+  }
+}
