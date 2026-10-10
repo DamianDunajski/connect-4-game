@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,8 @@ import java.util.UUID;
 @RequestMapping("/game/connect-4")
 @Tag(name = "Connect 4", description = "Game API")
 public class GameResource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameResource.class);
 
     private final GameRepository repository;
 
@@ -36,6 +40,7 @@ public class GameResource {
             @ApiResponse(responseCode = "500", description = "Error occurred - game has not been created")
     })
     public Game createGame(@Parameter(name = "player", description = "Player who starts new game", required = true) @NotNull @Valid @RequestBody Player player) {
+        LOGGER.info("Creating new game for player: {}", player.name());
         Game game = new Game(player);
         repository.saveGame(game);
         return game;

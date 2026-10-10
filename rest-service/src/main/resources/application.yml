@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: connect-4-game.api
   threads:
     virtual:
       enabled: true
@@ -7,6 +9,9 @@ spring:
       enabled: true
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:

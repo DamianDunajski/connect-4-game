@@ -6,6 +6,8 @@ services:
       replicas: 1
     ports:
       - "8080:8080"
+    environment:
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: "http://tempo:4318/v1/traces"
     labels:
       logging: "alloy"
       app: "connect-4-game"
@@ -24,8 +26,9 @@ services:
       - game-api
       - loki
       - mimir
+      - tempo
   loki:
-    image: grafana/loki:3.7.0
+    image: grafana/loki:3.7.8
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -37,8 +40,18 @@ services:
     volumes:
       - ./docker/mimir/mimir.yaml:/etc/mimir/mimir.yaml:ro
       - mimir_data:/data/mimir
+  tempo:
+    image: grafana/tempo:3.1.0
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./docker/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200" # tempo HTTP query
+      - "4317:4317" # otlp grpc
+      - "4318:4318" # otlp http
   grafana:
-    image: grafana/grafana:13.2
+    image: grafana/grafana:13.2.3
     ports:
       - "3000:3000"
     environment:
@@ -48,6 +61,8 @@ services:
     depends_on:
       - loki
       - mimir
+      - tempo
 
 volumes:
   mimir_data:
+  tempo_data:

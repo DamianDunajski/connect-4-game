@@ -6,6 +6,13 @@ datasources:
     access: proxy
     url: http://loki:3100
     editable: true
+    jsonData:
+      derivedFields:
+        # Extracts trace_id from Logstash JSON logs and creates a 1-click link to Tempo
+        - datasourceUid: tempo
+          matcherRegex: '"traceId":"([a-f0-9]+)"'
+          name: TraceID
+          url: '$${__value.raw}'
   - name: Mimir
     type: prometheus
     access: proxy
@@ -14,3 +21,22 @@ datasources:
     jsonData:
       prometheusType: Mimir
       prometheusVersion: 3.2.2
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+    editable: true
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: Loki
+        tags: ['app']
+      tracesToMetrics:
+        datasourceUid: Mimir
+        tags: [{ key: 'service.name', value: 'service' }]
+      serviceMap:
+        datasourceUid: Mimir
+      nodeGraph:
+        enabled: true
+      lokiSearch:
+        datasourceUid: Loki
