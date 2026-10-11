@@ -1,16 +1,16 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.resource;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Game.Board;
 import com.kainos.connect4game.domain.Player;
-import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
+import com.kainos.connect4game.rest.resource.base.BaseRestResourceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.client.assertj.RestTestClientResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CreateGameTest extends BaseGameResourceTest {
+class CreateGameTest extends BaseRestResourceTest {
 
     private final Player player = new Player("John", Player.Colour.Red);
 

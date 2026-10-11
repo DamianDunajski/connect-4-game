@@ -1,8 +1,8 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.resource;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
-import com.kainos.connect4game.rest.repository.GameRepository;
+import com.kainos.connect4game.rest.restclient.StorageClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,15 +21,15 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/game/connect-4")
-@Tag(name = "Connect 4", description = "Game API")
-public class GameResource {
+@Tag(name = "Connect 4", description = "Game REST API")
+public class RestResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestResource.class);
 
-    private final GameRepository repository;
+    private final StorageClient storageClient;
 
-    public GameResource(GameRepository repository) {
-        this.repository = repository;
+    public RestResource(StorageClient storageClient) {
+        this.storageClient = storageClient;
     }
 
     @PostMapping
@@ -42,7 +42,7 @@ public class GameResource {
     public Game createGame(@Parameter(name = "player", description = "Player who starts new game", required = true) @NotNull @Valid @RequestBody Player player) {
         LOGGER.info("Creating new game for player: {}", player.name());
         Game game = new Game(player);
-        repository.saveGame(game);
+        storageClient.saveGame(game);
         return game;
     }
 
@@ -57,8 +57,8 @@ public class GameResource {
     })
     public Game joinGame(@Parameter(name = "id", description = "ID of the game to join", required = true) @PathVariable("id") UUID id,
                          @Parameter(name = "player", description = "Player who joins existing game", required = true) @NotNull @Valid @RequestBody Player player) {
-        Game game = repository.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return repository.saveGame(game.addPlayer(player));
+        Game game = storageClient.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return storageClient.saveGame(game.addPlayer(player));
     }
 
     @PutMapping(path = "{id}/drop/{colour}/column/{column}")
@@ -73,8 +73,8 @@ public class GameResource {
     public Game dropDisc(@Parameter(name = "id", description = "ID of the game", required = true) @PathVariable("id") UUID id,
                          @Parameter(name = "colour", description = "Colour of the disc being dropped", required = true) @PathVariable("colour") Player.Colour colour,
                          @Parameter(name = "column", description = "Column the disc being dropped into", required = true) @PathVariable("column") int column) {
-        Game game = repository.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return repository.saveGame(game.dropDisc(colour, column));
+        Game game = storageClient.findGameById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return storageClient.saveGame(game.dropDisc(colour, column));
     }
 
 }

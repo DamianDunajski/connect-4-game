@@ -1,16 +1,20 @@
-package com.kainos.connect4game.rest.repository;
+package com.kainos.connect4game.rest.resource.base;
 
 import com.kainos.connect4game.domain.Game;
-import org.springframework.stereotype.Repository;
+import com.kainos.connect4game.rest.restclient.StorageClient;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
-public class InMemoryGameRepository implements GameRepository {
+public class TestStorageClient extends StorageClient {
 
-    private final ConcurrentHashMap<UUID, Game> games = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Game> games;
+
+    public TestStorageClient(ConcurrentHashMap<UUID, Game> games) {
+        super(null); // ignored
+        this.games = games;
+    }
 
     @Override
     public Optional<Game> findGameById(UUID id) {

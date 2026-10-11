@@ -1,9 +1,9 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.resource;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Game.Board;
 import com.kainos.connect4game.domain.Player;
-import com.kainos.connect4game.rest.api.base.BaseGameResourceTest;
+import com.kainos.connect4game.rest.resource.base.BaseRestResourceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ import java.util.UUID;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DropDiscTest extends BaseGameResourceTest {
+class DropDiscTest extends BaseRestResourceTest {
 
     private final Player firstPlayer = new Player("John", Player.Colour.Red);
     private final Player secondPlayer = new Player("Carl", Player.Colour.Yellow);

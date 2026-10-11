@@ -1,4 +1,4 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

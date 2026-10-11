@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: connect-4-game.api
@@ -9,9 +12,6 @@ spring:
       enabled: true
 
 management:
-  tracing:
-    sampling:
-      probability: 1.0
   endpoints:
     web:
       exposure:
@@ -21,6 +21,14 @@ management:
       probes:
         enabled: true
       show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: "http://localhost:4318/v1/traces"
 
 logging:
   structured:

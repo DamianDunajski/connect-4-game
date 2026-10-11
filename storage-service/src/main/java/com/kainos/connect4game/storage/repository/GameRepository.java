@@ -1,4 +1,4 @@
-package com.kainos.connect4game.rest.repository;
+package com.kainos.connect4game.storage.repository;
 
 import com.kainos.connect4game.domain.Game;
 

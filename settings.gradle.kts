@@ -4,3 +4,4 @@ includeBuild("build-logic")
 
 include(":domain")
 include(":rest-service")
+include(":storage-service")

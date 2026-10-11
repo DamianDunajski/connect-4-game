@@ -58,9 +58,11 @@ loki.write "local_loki" {
 }
 
 // METRICS-1. Fetch metrics from Spring Boot Actuator endpoint
-prometheus.scrape "game_api" {
+prometheus.scrape "game_services" {
   targets = [{
-    __address__ = "game-api:8080",
+    __address__ = "game-rest-service:8080",
+  }, {
+    __address__ = "game-storage-service:8070",
   }]
   metrics_path = "/actuator/prometheus"
   forward_to = [prometheus.remote_write.mimir.receiver]

@@ -1,18 +1,29 @@
-package com.kainos.connect4game.rest.api;
+package com.kainos.connect4game.rest.resource;
 
 import com.kainos.connect4game.domain.Game;
 import com.kainos.connect4game.domain.Player;
+import com.kainos.connect4game.rest.resource.base.TestStorageClient;
+import com.kainos.connect4game.rest.restclient.StorageClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class GameResourceIT  {
+@TestPropertySource(properties = {
+    "storage-service.endpoint=http://ignore-me",
+})
+class RestResourceIT {
 
     @LocalServerPort
     private int port;
@@ -93,6 +104,16 @@ class GameResourceIT  {
         return client.put().uri("/game/connect-4/%s/drop/%s/column/%s".formatted(game.id(), colour, column)).exchange()
                 .expectStatus().isOk()
                 .expectBody(Game.class).returnResult().getResponseBody();
+    }
+
+    @TestConfiguration
+    public static class TestStorageClientConfig {
+
+        @Bean
+        @Primary
+        public StorageClient testStorageClient() {
+            return new TestStorageClient(new ConcurrentHashMap<>());
+        }
     }
 
 }

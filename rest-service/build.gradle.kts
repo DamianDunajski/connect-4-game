@@ -7,6 +7,7 @@ plugins {
 dependencies {
     api(project(":domain"))
     implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.restclient)
     implementation(libs.spring.boot.starter.actuator)
     testImplementation(libs.spring.boot.starter.test)
     implementation(libs.spring.boot.micrometer.tracing.opentelemetry)
@@ -19,7 +20,7 @@ dependencies {
 graalvmNative {
     binaries {
         named("main") {
-            imageName.set("connect-4-game")
+            imageName.set("connect4game-rest-service")
             mainClass.set("com.kainos.connect4game.rest.Application")
             sharedLibrary.set(false)
         }
